@@ -15,6 +15,7 @@ import Image from "next/image";
 import { Edit3, ImageIcon } from "lucide-react";
 import HistoryCard from "./HistoryCard";
 import clsx from "clsx";
+import { motion, AnimatePresence } from "motion/react";
 
 const links = [
   {
@@ -77,11 +78,11 @@ const historyData = [
 ];
 
 const userLink = {
-  label: "Manu Arora",
+  label: "Miko Arora",
   href: "#",
   icon: (
     <Image
-      src="/images/logo.png"
+      src="/images/profile.jpg"
       className="h-8 w-8 shrink-0 rounded-full"
       width={32}
       height={32}
@@ -118,15 +119,35 @@ const CollapsibleSection = ({
           {icon}
           <span className="text-sm">{title}</span>
         </div>
-        <IconChevronDown
-          className={clsx("h-5 w-5 transition-transform", {
-            "rotate-180": isOpen,
-          })}
-        />
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+        >
+          <IconChevronDown
+            className={clsx("h-5 w-5 transition-transform", {
+              "rotate-180": isOpen,
+            })}
+          />
+        </motion.div>
       </button>
 
-      {/* CHANGE 3: The children wrapper needs to be flexible to grow and shrink */}
-      {isOpen && <div className="min-h-0 flex-1">{children}</div>}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.3, ease: "easeInOut" },
+              opacity: { duration: 0.2, ease: "easeInOut" },
+            }}
+            className="min-h-0 flex-1"
+          >
+            {/* CHANGE 3: The children wrapper needs to be flexible to grow and shrink */}
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -145,11 +166,11 @@ export default function SidebarMain() {
     // The blur effect div is removed as it's likely for presentation and not part of the component logic
     <div className="flex h-screen text-sidebar-foreground">
       <Sidebar open={open}>
-        <SidebarBody className="justify-between gap-10">
+        <SidebarBody className="relative flex h-full flex-col">
           {/* CHANGE 1: Main layout container. No longer scrolls itself. */}
           <div className="flex h-full flex-1 flex-col overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-shrink-0 items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div
                   className="relative p-1 bg-[#131312] border border-[#313131] rounded-[8px]"
@@ -211,11 +232,20 @@ export default function SidebarMain() {
                 icon={<ImageIcon className="p-0.5" />}
                 defaultOpen={true}
               >
-                <div className="border-l-2 border-gray-700 ml-2">
+                <motion.div
+                  className="border-l-2 border-gray-700 ml-2"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
                   {menuItems.map((item, index) => (
-                    <div
+                    <motion.div
                       key={index}
                       className="flex cursor-pointer items-center gap-4 p-2 pl-5"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
+                      whileHover={{ x: 5, transition: { duration: 0.2 } }}
                     >
                       <div
                         className="p-1 bg-[#131312] border border-[#313131] rounded-[8px]"
@@ -226,9 +256,9 @@ export default function SidebarMain() {
                       <span className={`text-sm ${item.color}`}>
                         {item.label}
                       </span>
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               </CollapsibleSection>
             </div>
 
@@ -241,23 +271,42 @@ export default function SidebarMain() {
               defaultOpen={true}
             >
               {/* CHANGE 3 (continued): This container now handles the scrolling */}
-              <div className="h-full overflow-y-auto pr-2">
-                <div className="flex flex-col gap-2 py-2">
-                  {historyData.map((history) => (
-                    <HistoryCard
+              <div className="h-full overflow-y-auto pr-2 pb-20 hide-scrollbar">
+                <motion.div
+                  className="flex flex-col gap-2 py-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                  {historyData.map((history, index) => (
+                    <motion.div
                       key={history.id}
-                      imageUrl={history.imageUrl}
-                      title={history.title}
-                      prompt={history.prompt}
-                    />
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: 0.1 + index * 0.05,
+                        ease: "easeOut",
+                      }}
+                      whileHover={{
+                        scale: 1.02,
+                        transition: { duration: 0.2 },
+                      }}
+                    >
+                      <HistoryCard
+                        imageUrl={history.imageUrl}
+                        title={history.title}
+                        prompt={history.prompt}
+                      />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               </div>
             </CollapsibleSection>
           </div>
 
           {/* Footer */}
-          <div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 pt-10 bg-gradient-to-t from-black to-transparent backdrop-blur-sm">
             <SidebarLink link={userLink} />
           </div>
         </SidebarBody>
