@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Quicksand } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
@@ -9,11 +9,11 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Aura.ai",
+  description: "The fastest way to generate high quality AI images",
 };
 
-const geistSans = Geist({
+const geistSans = Quicksand({
   variable: "--font-geist-sans",
   display: "swap",
   subsets: ["latin"],

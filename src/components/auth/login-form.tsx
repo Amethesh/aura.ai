@@ -4,7 +4,6 @@ import { cn } from "@/src/lib/utils";
 import { createClient } from "@/src/lib/supabase/client";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -42,47 +41,52 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <h2 className="font-semibold text-center text-xl">Login Now</h2>
       <SignInWithGoogleButton />
+      <div className="border-b border-gray-500"></div>
       <form onSubmit={handleLogin}>
         <div className="flex flex-col gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+          <div className="">
+            {/* <Label htmlFor="email">Email</Label> */}
             <Input
               id="email"
               type="email"
-              placeholder="m@example.com"
+              placeholder="Email address"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="grid gap-2">
+          <div className="">
             <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
-              <Link
-                href="/auth/forgot-password"
-                className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-              >
-                Forgot your password?
-              </Link>
+              {/* <Label htmlFor="password">Password</Label> */}
             </div>
             <Input
               id="password"
               type="password"
               required
               value={password}
+              placeholder="Password"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-64" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Login"}
           </Button>
         </div>
-        <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="/auth/sign-up" className="underline underline-offset-4">
+        <div className="mt-4 text-center text-sm flex justify-center gap-4">
+          <Link
+            href="/sign-up"
+            className="text-[#95A4FC] underline-offset-4 hover:text-[#7b8be6] transition-colors hover:underline"
+          >
             Sign up
+          </Link>
+          <Link
+            href="/forgot-password"
+            className="inline-block text-sm underline-offset-4 hover:underline text-[#95A4FC] hover:text-[#7b8be6] transition-colors"
+          >
+            Forgot your password?
           </Link>
         </div>
       </form>
