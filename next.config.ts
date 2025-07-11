@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "image.civitai.com",
       },
+      {
+        protocol: "https",
+        hostname: "bflplaygroundstore.blob.core.windows.net",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "nvbssjoomsozojofygor.supabase.co",
+      },
     ],
   },
 };

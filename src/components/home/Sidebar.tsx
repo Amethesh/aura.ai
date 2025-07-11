@@ -16,6 +16,7 @@ import { Edit3, ImageIcon } from "lucide-react";
 import HistoryCard from "./HistoryCard";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "motion/react";
+import { UserProfile } from "../UserProfile";
 
 const links = [
   {
@@ -77,20 +78,6 @@ const historyData = [
   },
 ];
 
-const userLink = {
-  label: "Miko Arora",
-  href: "#",
-  icon: (
-    <Image
-      src="/images/profile.jpg"
-      className="h-8 w-8 shrink-0 rounded-full"
-      width={32}
-      height={32}
-      alt="User Avatar"
-    />
-  ),
-};
-
 const CollapsibleSection = ({
   title,
   icon,
@@ -107,7 +94,6 @@ const CollapsibleSection = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    // CHANGE 2: The wrapper for the section needs to be a flex container to allow children to fill height
     <div className={clsx("w-full text-neutral-200 flex flex-col", className)}>
       <button
         type="button"
@@ -143,7 +129,6 @@ const CollapsibleSection = ({
             }}
             className="min-h-0 flex-1"
           >
-            {/* CHANGE 3: The children wrapper needs to be flexible to grow and shrink */}
             {children}
           </motion.div>
         )}
@@ -152,22 +137,18 @@ const CollapsibleSection = ({
   );
 };
 
-// --- Main Sidebar Component ---
 export default function SidebarMain() {
   const [open, setOpen] = useState(true);
   const [hovered, setHovered] = useState(false);
 
-  // Reusable style object for consistent appearance
   const iconContainerStyle = {
     boxShadow: "inset 0px 0px 17.6px -4px rgba(200, 200, 200, 0.25)",
   };
 
   return (
-    // The blur effect div is removed as it's likely for presentation and not part of the component logic
     <div className="flex h-screen text-sidebar-foreground">
       <Sidebar open={open}>
         <SidebarBody className="relative flex h-full flex-col">
-          {/* CHANGE 1: Main layout container. No longer scrolls itself. */}
           <div className="flex h-full flex-1 flex-col overflow-hidden">
             {/* Header */}
             <div className="flex flex-shrink-0 items-center justify-between gap-4">
@@ -221,7 +202,6 @@ export default function SidebarMain() {
             </div>
 
             {/* Links and Sections */}
-            {/* Static Content Area (Links and Image Section) */}
             <div className="mt-8 flex flex-shrink-0 flex-col gap-2">
               {links.map((link, idx) => (
                 <SidebarLink key={idx} link={link} />
@@ -266,11 +246,9 @@ export default function SidebarMain() {
             <CollapsibleSection
               title="Generation History"
               icon={<IconClock className="p-0.5" />}
-              // CHANGE 2 (continued): Make this section a flex item that grows
               className="flex-1 min-h-0"
               defaultOpen={true}
             >
-              {/* CHANGE 3 (continued): This container now handles the scrolling */}
               <div className="h-full overflow-y-auto pr-2 pb-20 hide-scrollbar">
                 <motion.div
                   className="flex flex-col gap-2 py-2"
@@ -306,8 +284,8 @@ export default function SidebarMain() {
           </div>
 
           {/* Footer */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 pt-10 bg-gradient-to-t from-black to-transparent backdrop-blur-sm">
-            <SidebarLink link={userLink} />
+          <div className="absolute bottom-0 left-0 right-0 p-4 pt-1 bg-gradient-to-t from-black to-transparent backdrop-blur-sm">
+            <UserProfile />
           </div>
         </SidebarBody>
       </Sidebar>

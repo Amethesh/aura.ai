@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import SidebarMain from "../components/home/Sidebar";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -33,7 +34,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className="relative flex h-full w-full flex-row">
+            <div className="fixed">
+              <SidebarMain />
+            </div>
+            <div className="w-full h-full ml-64">{children}</div>
+          </div>
         </ThemeProvider>
       </body>
     </html>

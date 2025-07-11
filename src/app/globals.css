@@ -91,3 +91,21 @@
   border: 1px solid #383838;
   border-radius: 30px;
 }
+
+/* This is the main container for the masonry grid */
+.my-masonry-grid {
+  display: flex;
+  margin-left: 0px; /* gutter size offset */
+  width: auto;
+}
+
+/* This is for each column in the grid */
+.my-masonry-grid_column {
+  padding-left: 10px; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* This is for each item within a column */
+.my-masonry-grid_column > div {
+  margin-bottom: 10px; /* space between items */
+}
