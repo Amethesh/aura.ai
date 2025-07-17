@@ -1,8 +1,22 @@
 "use client";
 import Masonry from "react-masonry-css";
 import ImageCard from "../ui/ImageCard";
+export interface ImageCardType {
+  id: number;
+  image_url: string;
+  prompt: string;
+  width: number;
+  height: number;
+  blurhash: string;
+}
 
-const ImageGallery = ({ images }) => {
+type ImageGalleryProps = {
+  images: ImageCardType[] | null;
+};
+
+const ImageGallery = ({ images }: ImageGalleryProps) => {
+  if (!images || images.length === 0) return <p>No images to show.</p>;
+
   const breakpointColumnsObj = {
     default: 4,
     1500: 3,
@@ -23,7 +37,7 @@ const ImageGallery = ({ images }) => {
           prompt={image.prompt}
           width={image.width}
           height={image.height}
-          blurhash={image.blurhash}
+          // blurhash={image.blurhash}
         />
       ))}
     </Masonry>

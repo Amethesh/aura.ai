@@ -12,29 +12,24 @@ import {
   IconWand,
 } from "@tabler/icons-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./hover-card";
+import { ArrowRight } from "lucide-react";
 
-// Define the props for the component
-interface ImageCardProps {
+export interface ImageCardProps {
   imageUrl: string;
   prompt: string;
   width: number;
   height: number;
-  blurhash: string;
 }
 
-const ImageCard = ({
-  imageUrl,
-  prompt,
-  width,
-  height,
-  blurhash,
-}: ImageCardProps) => {
+const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [isModalImageLoading, setIsModalImageLoading] = useState(true);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  console.log(imageUrl);
+
   const cardOverlayVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -45,37 +40,86 @@ const ImageCard = ({
     exit: { opacity: 0, y: 30, transition: { duration: 0.3, ease: "easeIn" } },
   };
 
+  const pulseVariants: Variants = {
+    pulse: {
+      scale: [1, 1.05, 1],
+      opacity: [0.5, 0.8, 0.5],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+    },
+  };
+
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+  };
+
+  const handleModalImageLoad = () => {
+    setIsModalImageLoading(false);
+  };
+
+  const handleModalBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      closeModal();
+    }
+  };
+
   return (
     <>
-      {/* --- Image Card Preview --- */}
-      {/* CHANGE 1: Set width to full and REMOVE fixed height. The card is now responsive. */}
       <motion.div
-        className="relative w-full rounded-[28px] overflow-hidden cursor-pointer border-2 border-white/30"
+        className="relative w-full rounded-[24px] overflow-hidden cursor-pointer border-2 border-white/30"
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
-        whileHover={{ scale: 1.02 }} // Keep the cool scale effect
+        whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.3 }}
         onClick={openModal}
         layoutId={`card-container-${imageUrl}`}
       >
-        {/* Background Image Wrapper */}
         <div className="relative">
-          {/* CHANGE 2: Remove layout="fill" and add width/height props. */}
-          {/* This makes the image responsive while preventing layout shift. */}
+          <AnimatePresence>
+            {isImageLoading && (
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md z-10 rounded-[24px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.div className="relative">
+                  <motion.div
+                    className="w-10 h-10 rounded-full border-4 border-white/20"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.5, 0.2, 0.5],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <Image
             src={imageUrl}
             alt={prompt}
-            width={width} // Use the actual image width for optimization
-            height={height} // Use the actual image height for aspect ratio
-            className="w-full h-auto" // Ensures the image is responsive
-            blurDataURL={blurhash}
+            width={width}
+            height={height}
+            className="w-full h-auto"
+            blurDataURL="..."
             placeholder="blur"
+            onLoad={handleImageLoad}
+            onError={() => setIsImageLoading(false)}
           />
         </div>
 
-        {/* Original Hover Overlay */}
         <AnimatePresence>
-          {isHovered && (
+          {isHovered && !isImageLoading && (
             <motion.div
               className="absolute bottom-0 left-0 w-full h-[80px] p-5 flex items-end
                         bg-gradient-to-t from-black/75 to-transparent backdrop-blur-[2px]"
@@ -85,16 +129,13 @@ const ImageCard = ({
               exit="exit"
             >
               <div className="w-full flex justify-between items-center">
-                {/* Edit Button */}
                 <button
                   className="flex items-center gap-2 py-2 px-4 bg-white/30 rounded-full text-white font-semibold text-base backdrop-blur-sm"
-                  onClick={(e) => e.stopPropagation()} // Prevents modal from opening when clicking button
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <IconWand />
                   <span>Edit</span>
                 </button>
-
-                {/* Action Icons */}
                 <div className="flex items-center gap-4 text-white/80 text-xl">
                   <IconDownload className="hover:text-white cursor-pointer transition-colors" />
                   <IconHeart className="hover:text-white cursor-pointer transition-colors" />
@@ -119,7 +160,7 @@ const ImageCard = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={closeModal}
+            onClick={handleModalBackdropClick}
           >
             {/* Modal Content */}
             <div
@@ -134,42 +175,77 @@ const ImageCard = ({
               >
                 <button
                   onClick={closeModal}
-                  className="flex items-center gap-2 py-2 px-4 rounded-full hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-2 p-2 rounded-2xl hover:bg-white/10 transition-colors"
                 >
-                  <IconArrowLeft size={20} />
+                  <IconArrowLeft size={25} className="custom-box" />
                   <span className="font-medium">Go Back</span>
                 </button>
-                <div className="flex items-center gap-3 md:gap-4 text-white/80">
+                <div className="flex items-center gap-6 md:gap-4 text-white/80">
                   <IconDownload
                     className="cursor-pointer hover:text-white transition-colors"
-                    size={22}
+                    size={28}
                   />
                   <IconThumbDown
                     className="cursor-pointer hover:text-white transition-colors"
-                    size={22}
+                    size={28}
                   />
                   <IconHeart
                     className="cursor-pointer hover:text-white transition-colors"
-                    size={22}
+                    size={28}
                   />
                   <IconTrash
                     className="cursor-pointer hover:text-red-400 transition-colors"
-                    size={22}
+                    size={28}
                   />
                 </div>
               </motion.header>
 
               {/* Main Image */}
-              <div className="flex-1 flex items-center justify-center my-4 min-h-0">
+              <div
+                className="flex-1 flex items-center justify-center my-4 min-h-0"
+                onClick={handleModalBackdropClick}
+              >
                 <motion.div
-                  className="relative w-full h-full"
+                  className="relative max-w-[90vw] max-h-[70vh] w-auto h-auto"
                   layoutId={`card-container-${imageUrl}`}
+                  onClick={(e) => e.stopPropagation()}
                 >
+                  {/* Modal Loading Animation */}
+                  <AnimatePresence>
+                    {isImageLoading && (
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md z-10 rounded-[24px]"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <motion.div className="relative">
+                          <motion.div
+                            className="w-10 h-10 rounded-full border-4 border-white/20"
+                            animate={{
+                              scale: [1, 1.2, 1],
+                              opacity: [0.5, 0.2, 0.5],
+                            }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <Image
                     src={imageUrl}
                     alt={prompt}
-                    layout="fill"
-                    objectFit="contain"
+                    width={width}
+                    height={height}
+                    className="rounded-[28px] max-w-[90vw] max-h-[70vh] w-auto h-auto object-contain"
+                    onLoad={handleModalImageLoad}
+                    onError={() => setIsModalImageLoading(false)}
                   />
                 </motion.div>
               </div>
@@ -181,26 +257,26 @@ const ImageCard = ({
                 animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
               >
                 <div className="max-w-prose flex items-center gap-4">
-                  <span className="font-semibold text-white/50 text-nowrap">
-                    Generate →
+                  <span className="flex gap-2 items-center font-semibold text-white/80 text-nowrap">
+                    Generate
+                    <ArrowRight className="custom-box" size={25} />
                   </span>
-                  {/* <p className="text-white">{prompt}</p> */}
                   <HoverCard>
-                    <HoverCardTrigger className="cursor-pointer">
-                      {prompt.length > 50
-                        ? `${prompt.slice(0, 50)}...`
+                    <HoverCardTrigger className="cursor-pointer text-sm text-nowrap">
+                      {prompt.length > 80
+                        ? `${prompt.slice(0, 80)}...`
                         : prompt}
                     </HoverCardTrigger>
                     <HoverCardContent>{prompt}</HoverCardContent>
                   </HoverCard>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button className="flex items-center gap-2 py-2 px-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors backdrop-blur-sm">
-                    <IconWand size={20} />
+                <div className="flex items-center gap-3 text-lg font-semibold">
+                  <button className="flex items-center gap-2 py-2 px-5 border-2 border-white/20 text-accent bg-[#1E1E1E]/50 rounded-2xl transition-colors backdrop-blur-sm hover:text-white/80">
+                    <IconWand size={25} />
                     <span>Edit</span>
                   </button>
-                  <button className="flex items-center gap-2 py-2 px-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors backdrop-blur-sm">
-                    <IconShare size={20} />
+                  <button className="flex items-center gap-2 py-2 px-5 border-2 border-white/20 bg-[#1E1E1E]/50 rounded-2xl transition-colors backdrop-blur-sm hover:text-accent">
+                    <IconShare size={25} />
                     <span>Share</span>
                   </button>
                 </div>

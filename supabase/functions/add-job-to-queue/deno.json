@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "pg-boss": "npm:pg-boss@10.3.2"
+  }
+}

@@ -1,19 +1,18 @@
-import InputBox from "../components/inputBox/InputBox";
-import BackgroundImage from "../components/home/BackgroundImage";
-import ImageGrid from "../components/home/ImageGrid";
-import { createClient } from "../lib/supabase/server";
-import { LogoutButton } from "../components/auth/logout-button";
+import { ArrowBigDown, ArrowDown, SparklesIcon } from "lucide-react";
 import { IconSparkles } from "@tabler/icons-react";
+import { createClient } from "@/src/lib/supabase/server";
+import BackgroundImage from "@/src/components/home/BackgroundImage";
+import InputBox from "@/src/components/inputBox/InputBox";
+import ImageGallery from "@/src/components/home/ImageGrid";
 
 const page = async () => {
   const supabase = createClient();
+
   const { data: images, error } = await (
     await supabase
   ).rpc("get_random_images", {
     limit_count: 15,
   });
-
-  console.log(images);
 
   if (error) {
     console.error("Error fetching random images:", error);
@@ -31,14 +30,12 @@ const page = async () => {
           <IconSparkles /> Generate images from text and references
         </h1>
         <InputBox />
-        <LogoutButton />
       </div>
       <div className="p-2 mt-16">
         <p className="p-2 ml-3 mb-2 flex font-medium">
           Examples
-          {/* <ArrowDown /> */}
         </p>
-        <ImageGrid images={images} />
+        <ImageGallery images={images} />
       </div>
     </div>
   );

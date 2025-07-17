@@ -2,6 +2,7 @@
 import {
   IconArrowUp,
   IconChevronDown,
+  IconChevronUp,
   IconClock,
   IconColorSwatch,
   IconEdit,
@@ -17,13 +18,9 @@ import HistoryCard from "./HistoryCard";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "motion/react";
 import { UserProfile } from "../UserProfile";
+import Link from "next/link";
 
 const links = [
-  {
-    label: "New Chat",
-    href: "#",
-    icon: <IconEdit className="h-5 w-5 shrink-0" />,
-  },
   {
     label: "Library",
     href: "#",
@@ -109,9 +106,9 @@ const CollapsibleSection = ({
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
-          <IconChevronDown
+          <IconChevronUp
             className={clsx("h-5 w-5 transition-transform", {
-              "rotate-180": isOpen,
+              "rotate-0": isOpen,
             })}
           />
         </motion.div>
@@ -154,8 +151,7 @@ export default function SidebarMain() {
             <div className="flex flex-shrink-0 items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div
-                  className="relative p-1 bg-[#131312] border border-[#313131] rounded-[8px]"
-                  style={iconContainerStyle}
+                  className="custom-box"
                   onMouseEnter={() => setHovered(true)}
                   onMouseLeave={() => setHovered(false)}
                 >
@@ -219,24 +215,31 @@ export default function SidebarMain() {
                   transition={{ duration: 0.3, delay: 0.1 }}
                 >
                   {menuItems.map((item, index) => (
-                    <motion.div
+                    <Link
                       key={index}
-                      className="flex cursor-pointer items-center gap-4 p-2 pl-5"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
-                      whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                      href={`/image/${item.label.toLowerCase()}`}
                     >
-                      <div
-                        className="p-1 bg-[#131312] border border-[#313131] rounded-[8px]"
-                        style={iconContainerStyle}
+                      <motion.div
+                        className="flex cursor-pointer items-center gap-4 p-2 pl-5"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{
+                          duration: 0.3,
+                          delay: 0.1 + index * 0.05,
+                        }}
+                        whileHover={{ x: 5, transition: { duration: 0.2 } }}
                       >
-                        {item.icon}
-                      </div>
-                      <span className={`text-sm ${item.color}`}>
-                        {item.label}
-                      </span>
-                    </motion.div>
+                        <div
+                          className="p-1 bg-[#131312] border border-[#313131] rounded-[8px]"
+                          style={iconContainerStyle}
+                        >
+                          {item.icon}
+                        </div>
+                        <span className={`text-sm ${item.color}`}>
+                          {item.label}
+                        </span>
+                      </motion.div>
+                    </Link>
                   ))}
                 </motion.div>
               </CollapsibleSection>
