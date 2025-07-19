@@ -1,12 +1,11 @@
 "use client";
-import { IconArrowUp, IconTerminal } from "@tabler/icons-react";
+import { IconTerminal } from "@tabler/icons-react";
 import Image from "next/image";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
 import AnimatedCounter from "../ui/AnimatedCounter";
 import { Switch } from "../ui/switch";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, XCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -16,85 +15,107 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { MessageType } from "@/src/types/MessageType";
+import { useGenerateImage } from "@/src/hooks/useGenerateImage";
+import DialogBox from "./DialogBox";
+import { AnimatePresence, motion } from "motion/react";
+
+// Function to validate and sanitize the prompt
+const validateAndSanitizePrompt = (prompt: string) => {
+  const trimmed = prompt.trim();
+  if (!trimmed) return { isValid: false, error: "Prompt cannot be empty." };
+  if (trimmed.length > 1000)
+    return {
+      isValid: false,
+      error: "Prompt is too long (max 1000 characters).",
+    };
+  return { isValid: true, sanitized: trimmed };
+};
 
 interface InputBoxProps {
   conversationId?: string;
-  onNewMessage: (optimisticMessage: MessageType) => void;
 }
 
-const InputBox = ({ conversationId, onNewMessage }: InputBoxProps) => {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+const InputBox = ({ conversationId }: InputBoxProps) => {
   const [prompt, setPrompt] = useState("");
-  const [batchCount, setBatchCount] = useState(2);
+  const [batchCount, setBatchCount] = useState(1);
   const [ratio, setRatio] = useState("1:1");
   const [quality, setQuality] = useState("28");
   const [enhancePrompt, setEnhancePrompt] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
+
+  const mutation = useGenerateImage(conversationId);
+
+  // Clear mutation state on component unmount
+  useEffect(() => {
+    return () => {
+      mutation.reset();
+    };
+  }, [mutation.reset]);
 
   const handleGenerateClick = () => {
-    if (!prompt.trim() || isPending) return;
+    if (mutation.isPending) return;
 
-    // 1. Create the optimistic message object
-    const optimisticMessage: MessageType = {
-      // Use a temporary, unique ID for the React key.
-      // The real ID will come from the DB on the next fetch.
-      id: crypto.randomUUID(),
-      userPrompt: prompt,
-      input_images: [], // Assuming no input images for this example
-      output_images: [],
-      jobId: null, // We don't have the job ID yet
-      job_status: "pending", // The key part of the optimistic UI
-      parameters: { num_of_output: batchCount, ratio: ratio },
-      credit_cost: batchCount, // An estimate
-      error_message: null,
-    };
+    const { isValid, error, sanitized } = validateAndSanitizePrompt(prompt);
+    if (!isValid && error) {
+      setFormError(error);
+      return;
+    }
 
-    // 2. Immediately update the UI using the passed-in handler
-    onNewMessage(optimisticMessage);
+    setFormError(null);
 
-    // Clear the prompt from the textarea
-    setPrompt("");
-
-    const formData = {
-      prompt,
-      batchCount,
-      ratio,
-      quality,
-      enhancePrompt,
-      conversationId,
-    };
-
-    // 3. Start the actual API call in the background
-    startTransition(async () => {
-      try {
-        const response = await fetch("/api/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || "An unknown error occurred.");
-        }
-
-        // We no longer need router.refresh() or router.push().
-        // The real-time listener will handle the final update.
-        // If it's a new conversation, we still want to navigate.
-        if (!conversationId && result.conversationId) {
-          router.push(`/image/generate/${result.conversationId}`);
-        }
-      } catch (error: any) {
-        alert(error.message);
-        // Optional: Implement logic to remove or mark the optimistic message as failed
+    mutation.mutate(
+      {
+        prompt: sanitized!,
+        batchCount,
+        ratio,
+        quality,
+        enhancePrompt,
+        conversationId,
+      },
+      {
+        onSuccess: () => {
+          setPrompt(""); // Clear prompt only on success
+        },
+        onError: (err) => {
+          setFormError(`Generation failed: ${err.message}`);
+        },
       }
-    });
+    );
+  };
+
+  // Toggles the dialog box visibility
+  const handleCardClick = () => {
+    setIsDialogOpen((prev) => !prev);
   };
 
   return (
     <section className="w-fit bg-[rgba(17,17,17,0.8)] border border-white/10 backdrop-blur-[5px] rounded-3xl px-2 py-4">
+      {/* Display Dialog Box with Framer Motion Animation */}
+      <AnimatePresence>
+        {isDialogOpen && (
+          <motion.div
+            className="w-full mb-2 overflow-hidden" // overflow-hidden is crucial for height animation
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "20rem" }} // "20rem" is h-80 in Tailwind
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            {/* Inner div to handle padding and scrolling */}
+            <div className="w-full h-full p-2 overflow-y-auto">
+              <DialogBox />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Display Form Errors */}
+      {formError && (
+        <div className="flex items-center gap-2 text-red-400 bg-red-900/50 p-2 rounded-md mb-2 text-sm">
+          <XCircle size={16} />
+          <p>{formError}</p>
+        </div>
+      )}
       <div className="relative">
         <IconTerminal className="absolute top-4 left-4 text-neutral-500" />
         <Textarea
@@ -103,11 +124,21 @@ const InputBox = ({ conversationId, onNewMessage }: InputBoxProps) => {
           className="pl-12 hide-scrollbar"
           placeholder="A cute magical flying cat, cinematic, 4k"
           maxHeight={100}
-          disabled={isPending}
+          disabled={mutation.isPending}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleGenerateClick();
+            }
+          }}
         />
       </div>
       <div className="mt-2 flex gap-2">
-        <div className="w-[100px] h-[75px] rounded-2xl border border-[#282828] shadow-[0_4px_4px] shadow-black/30 relative">
+        {/* Model Card - Now Clickable */}
+        <div
+          onClick={handleCardClick}
+          className="w-[100px] h-[75px] rounded-2xl border border-[#282828] shadow-[0_4px_4px] shadow-black/30 relative cursor-pointer transition-transform hover:scale-105 active:scale-100"
+        >
           <p className="absolute w-full h-full bg-black/60 rounded-2xl flex justify-center items-center">
             Model
           </p>
@@ -119,7 +150,11 @@ const InputBox = ({ conversationId, onNewMessage }: InputBoxProps) => {
             height={200}
           />
         </div>
-        <div className="w-[100px] h-[75px] rounded-2xl border border-[#282828] shadow-[0_4px_4px] shadow-black/30 relative">
+        {/* Lora Card - Now Clickable */}
+        <div
+          onClick={handleCardClick}
+          className="w-[100px] h-[75px] rounded-2xl border border-[#282828] shadow-[0_4px_4px] shadow-black/30 relative cursor-pointer transition-transform hover:scale-105 active:scale-100"
+        >
           <p className="absolute w-full h-full bg-black/60 rounded-2xl flex justify-center items-center">
             Lora
           </p>
@@ -146,7 +181,7 @@ const InputBox = ({ conversationId, onNewMessage }: InputBoxProps) => {
           <Select
             onValueChange={setRatio}
             defaultValue={ratio}
-            disabled={isPending}
+            disabled={mutation.isPending}
           >
             <SelectTrigger className="w-[110px]">
               <SelectValue placeholder="Select a Ratio" />
@@ -170,7 +205,7 @@ const InputBox = ({ conversationId, onNewMessage }: InputBoxProps) => {
           <Select
             onValueChange={setQuality}
             defaultValue={quality}
-            disabled={isPending}
+            disabled={mutation.isPending}
           >
             <SelectTrigger className="w-[80px]">
               <SelectValue placeholder="Quality" />
@@ -192,17 +227,21 @@ const InputBox = ({ conversationId, onNewMessage }: InputBoxProps) => {
           <Switch
             checked={enhancePrompt}
             onCheckedChange={setEnhancePrompt}
-            disabled={isPending}
+            disabled={mutation.isPending}
           />
         </div>
 
         <button
           onClick={handleGenerateClick}
-          disabled={isPending}
-          className="px-8 rounded-2xl text-xl bg-accent/90 text-black font-black border-2 border-black flex items-center gap-2 backdrop-blur-md disabled:bg-gray-500 disabled:cursor-not-allowed"
+          disabled={mutation.isPending}
+          className="px-6 rounded-2xl text-xl bg-accent/90 text-black font-black border-2 border-black flex items-center gap-2 backdrop-blur-md disabled:bg-gray-500 disabled:cursor-not-allowed"
         >
-          {isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {isPending ? "Generating..." : "Generate"}
+          {mutation.isPending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <Sparkles />
+          )}
+          {mutation.isPending ? "Generating..." : "Generate"}
         </button>
       </div>
     </section>

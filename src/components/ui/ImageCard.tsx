@@ -77,11 +77,15 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
         onClick={openModal}
         layoutId={`card-container-${imageUrl}`}
       >
-        <div className="relative">
+        <div
+          className={`relative w-full ${
+            isImageLoading ? "h-[300px] w-[300px]" : "h-auto"
+          }`}
+        >
           <AnimatePresence>
             {isImageLoading && (
               <motion.div
-                className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md z-10 rounded-[24px]"
+                className="absolute flex items-center justify-center bg-black/20 backdrop-blur-md z-10 rounded-[24px] w-64 h-64"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

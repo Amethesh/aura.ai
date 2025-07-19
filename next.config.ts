@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "nvbssjoomsozojofygor.supabase.co",
       },
+      {
+        protocol: "https",
+        hostname: "replicate.delivery",
+      }
     ],
   },
 };

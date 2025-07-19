@@ -1,4 +1,3 @@
-import { ArrowBigDown, ArrowDown, SparklesIcon } from "lucide-react";
 import { IconSparkles } from "@tabler/icons-react";
 import { createClient } from "@/src/lib/supabase/server";
 import BackgroundImage from "@/src/components/home/BackgroundImage";
@@ -29,7 +28,7 @@ const page = async () => {
         <h1 className="flex items-center gap-2 font-semibold text-2xl mb-6">
           <IconSparkles /> Generate images from text and references
         </h1>
-        <InputBox />
+        <InputBox  />
       </div>
       <div className="p-2 mt-16">
         <p className="p-2 ml-3 mb-2 flex font-medium">

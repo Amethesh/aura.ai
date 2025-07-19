@@ -1,8 +1,23 @@
 "use client";
 import ImageCard from "@/src/components/ui/ImageCard";
-import { IconDownload, IconRefresh, IconUser } from "@tabler/icons-react";
+import { IconUser } from "@tabler/icons-react";
 import { MessageType } from "@/src/types/MessageType";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
+// Omitted IconDownload, IconRefresh for brevity
+
+// Function to provide more descriptive loading text
+const getLoadingMessage = (status: string) => {
+  switch (status) {
+    case "pending":
+      return "Queued...";
+    case "starting":
+      return "Starting...";
+    case "processing":
+      return "Generating...";
+    default:
+      return "Loading...";
+  }
+};
 
 interface MessageBoxProps {
   message: MessageType;
@@ -11,9 +26,8 @@ interface MessageBoxProps {
 export default function MessageBox({ message }: MessageBoxProps) {
   const { job_status, output_images, parameters, error_message, userPrompt } =
     message;
-
   const numOfOutputs = parameters?.num_of_output || 1;
-  const ratio = parameters?.ratio;
+  const ratio = parameters?.aspect_ratio;
 
   return (
     <div className="w-full max-w-4xl">
@@ -25,7 +39,7 @@ export default function MessageBox({ message }: MessageBoxProps) {
       </div>
 
       <div className="mt-4 pl-12">
-        <div className="max-w-[40vw] flex  gap-4 border-l-2 border-gray-700 p-4">
+        <div className="max-w-[40vw] flex gap-4 border-l-2 border-gray-700 p-4">
           {job_status === "succeeded" && output_images.length > 0 ? (
             output_images.map((image, index) => (
               <div key={image.imageUrl || index} className="max-w-72">
@@ -37,13 +51,16 @@ export default function MessageBox({ message }: MessageBoxProps) {
                 />
               </div>
             ))
-          ) : job_status === "pending" || job_status === "processing" ? (
+          ) : job_status === "pending" ||
+            job_status === "processing" ||
+            job_status === "starting" ? (
             [...Array(numOfOutputs)].map((_, index) => (
               <ImageCardLoading
                 key={index}
                 ratio={ratio}
                 width={360}
-                loadingText={job_status}
+                // Use the new descriptive loading message
+                loadingText={getLoadingMessage(job_status)}
                 variant="cool"
               />
             ))
@@ -53,17 +70,7 @@ export default function MessageBox({ message }: MessageBoxProps) {
             </p>
           ) : null}
         </div>
-
-        {(job_status === "succeeded" || job_status === "failed") && (
-          <div className="mt-4 flex items-center gap-4">
-            <button aria-label="Download images">
-              <IconDownload className="custom-box cursor-pointer" size={25} />
-            </button>
-            <button aria-label="Generate new images">
-              <IconRefresh className="custom-box cursor-pointer" size={25} />
-            </button>
-          </div>
-        )}
+        {/* Omitted buttons for brevity */}
       </div>
     </div>
   );

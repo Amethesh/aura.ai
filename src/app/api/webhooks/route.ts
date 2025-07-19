@@ -1,194 +1,137 @@
+// /webhook/route.ts
+
 import { NextResponse } from "next/server";
 import { Prediction, validateWebhook } from "replicate";
-// IMPORTANT: You need the base createClient function, not the server-specific one from SSR
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-// This is the main request handler for the webhook
+// Best practice: Create a dedicated admin client module
+// e.g., in /src/lib/supabase/admin.ts
+const getSupabaseAdmin = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+        throw new Error("Missing Supabase admin credentials.");
+    }
+    return createClient(supabaseUrl, supabaseServiceRoleKey);
+}
+
 export async function POST(request: Request) {
-  console.log("Received webhook...");
-
   const secret = process.env.REPLICATE_WEBHOOK_SIGNING_SECRET;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!secret || !supabaseUrl || !supabaseServiceRoleKey) {
-    console.error("Missing environment variables for webhook processing.");
-    return NextResponse.json(
-      { detail: "Server configuration error." },
-      { status: 500 }
-    );
+  if (!secret) {
+    console.error("REPLICATE_WEBHOOK_SIGNING_SECRET is not set.");
+    return NextResponse.json({ detail: "Server configuration error." }, { status: 500 });
   }
-
-  // FIX: Create a Supabase admin client using the Service Role Key.
-  // This client will bypass RLS policies, which is necessary for a server-side process.
-  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
   const url = new URL(request.url);
   const jobId = url.searchParams.get("jobId");
   const userId = url.searchParams.get("userId");
 
   if (!jobId || !userId) {
-    console.error("Webhook is missing 'jobId' or 'userId' URL parameter.");
-    return NextResponse.json(
-      { detail: "Missing required URL parameters." },
-      { status: 400 }
-    );
+    return NextResponse.json({ detail: "Missing required URL parameters." }, { status: 400 });
   }
-  
-  console.log("Webhook for job:", jobId, "from user:", userId);
 
   try {
-    const webhookIsValid = await validateWebhook(request.clone(), secret);
-    if (!webhookIsValid) {
-      return NextResponse.json(
-        { detail: "Webhook signature is invalid" },
-        { status: 401 }
-      );
+    const valid = await validateWebhook(request.clone(), secret);
+    if (!valid) {
+      return NextResponse.json({ detail: "Invalid webhook signature." }, { status: 401 });
     }
 
-    console.log("Webhook is valid!");
     const prediction: Prediction = await request.json();
+    const supabaseAdmin = getSupabaseAdmin();
 
-    // Pass the admin client to the processing function
-    await processWebhook({
-      prediction,
-      userId,
-      jobId,
+    // Idempotency Check: See if job is already processed.
+    const { data: currentJob } = await supabaseAdmin
+      .from("jobs")
+      .select("job_status")
+      .eq("id", jobId)
+      .single();
+
+    if (currentJob && (currentJob.job_status === 'succeeded' || currentJob.job_status === 'failed')) {
+        console.log(`Job ${jobId} already processed. Ignoring duplicate webhook.`);
+        return NextResponse.json({ detail: "Webhook already processed." }, { status: 200 });
+    }
+
+    // Handle failed predictions
+    if (prediction.status === "failed") {
+        await supabaseAdmin
+            .from("jobs")
+            .update({ job_status: "failed", error_message: prediction.error })
+            .eq("id", jobId);
+        // Here you could also trigger a credit refund.
+        return NextResponse.json({ detail: "Processed failed prediction." }, { status: 200 });
+    }
+
+    // Handle successful predictions
+    if (prediction.status === "succeeded" && Array.isArray(prediction.output)) {
+        await processSuccessfulPrediction({ prediction, userId, jobId, supabaseAdmin });
+    }
+
+    return NextResponse.json({ detail: "Webhook processed successfully" }, { status: 200 });
+
+  } catch (error: any) {
+    console.error("Error processing webhook:", error.message);
+    const supabaseAdmin = getSupabaseAdmin();
+    await supabaseAdmin
+      .from("jobs")
+      .update({ job_status: "failed", error_message: error.message })
+      .eq("id", jobId);
+      
+    return NextResponse.json({ detail: error.message }, { status: 500 });
+  }
+}
+
+async function processSuccessfulPrediction({ prediction, userId, jobId, supabaseAdmin }: any) {
+  // BUG FIX: Process all images from the output, not just the last one.
+  const imageProcessingPromises = prediction.output.map(async (imageUrl: string) => {
+    const supabaseImageUrl = await downloadAndStoreImage({
+      imageUrl,
+      predictionId: prediction.id,
+      imageIdentifier: prediction.output.indexOf(imageUrl), // To create unique names
       supabaseAdmin,
     });
 
-    return NextResponse.json(
-      { detail: "Webhook processed successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    console.error("Error processing webhook:", errorMessage);
-    await supabaseAdmin
-      .from("jobs")
-      .update({ job_status: "failed", error_message: errorMessage })
-      .eq("id", jobId);
-      
-    return NextResponse.json({ detail: errorMessage }, { status: 500 });
-  }
+    // We need the image ID to link it to the job.
+    const { data: newImage, error } = await supabaseAdmin
+      .from("images")
+      .insert({
+        image_url: supabaseImageUrl,
+        is_public: true,
+        user_id: userId,
+      })
+      .select("id")
+      .single();
+
+    if (error) throw new Error(`Failed to store image metadata: ${error.message}`);
+    return newImage.id;
+  });
+
+  const imageIds = await Promise.all(imageProcessingPromises);
+
+  // Use a transaction to link images and update the job status.
+  // This ensures that if linking fails, the whole operation fails.
+  const jobOutputImages = imageIds.map(imageId => ({ image_id: imageId, job_id: jobId }));
+  
+  const { error: linkError } = await supabaseAdmin.from("job_output_images").insert(jobOutputImages);
+  if (linkError) throw new Error(`Failed to link images to job: ${linkError.message}`);
+
+  await supabaseAdmin.from("jobs").update({ job_status: "succeeded" }).eq("id", jobId);
+  console.log(`Successfully processed job ${jobId} with ${imageIds.length} images.`);
 }
 
-// This function now accepts the admin client
-async function processWebhook({
-  prediction,
-  userId,
-  jobId,
-  supabaseAdmin, // Accept the admin client
-}: {
-  prediction: Prediction;
-  userId: string;
-  jobId: string;
-  supabaseAdmin: SupabaseClient; // Define its type
-}) {
-  console.log(
-    `Processing webhook for prediction ${prediction.id}, status: ${prediction.status}`
-  );
+async function downloadAndStoreImage({ imageUrl, predictionId, imageIdentifier, supabaseAdmin }: any) {
+  const response = await fetch(imageUrl);
+  if (!response.ok) throw new Error(`Failed to download image: ${response.statusText}`);
 
-  // Handle a successful prediction
-  if (
-    prediction.status === "succeeded" &&
-    prediction.output &&
-    Array.isArray(prediction.output) &&
-    prediction.output.length > 0
-  ) {
-    try {
-      const imageUrl = prediction.output[prediction.output.length - 1];
-      console.log(`Downloading image from: ${imageUrl}`);
+  const imageBuffer = await response.arrayBuffer();
+  // Ensure a unique filename for each image in a batch
+  const filename = `${predictionId}-${imageIdentifier}.png`;
 
-      const supabaseImageUrl = await downloadAndStoreImage({
-        imageUrl: imageUrl,
-        predictionId: prediction.id,
-        supabaseAdmin: supabaseAdmin, // Pass the admin client down
-      });
+  const { error } = await supabaseAdmin.storage
+    .from("generated-images")
+    .upload(filename, imageBuffer, { contentType: "image/png", upsert: true });
 
-      console.log(`Image stored at: ${supabaseImageUrl}`);
-      
-      // Use the admin client for all database operations
-      const { data: image, error: imageError } = await supabaseAdmin
-        .from("images")
-        .upsert({
-          image_url: supabaseImageUrl,
-          is_public: true,
-          user_id: userId,
-        })
-        .select("id")
-        .single();
+  if (error) throw new Error(`Failed to upload image to storage: ${error.message}`);
 
-      if (imageError || !image) {
-        throw new Error("Failed to store image metadata: " + imageError.message);
-      }
-
-      await supabaseAdmin
-        .from("job_output_images")
-        .insert({
-          image_id: image.id,
-          job_id: jobId,
-        });
-
-      await supabaseAdmin.from("jobs").update({ job_status: "succeeded" }).eq("id", jobId);
-
-      console.log(
-        `Updated prediction ${prediction.id} with Supabase image URL`
-      );
-    } catch (error) {
-      console.error("Error processing image:", error.message);
-      await supabaseAdmin
-        .from("jobs")
-        .update({
-          job_status: "failed",
-          error_message: error.message,
-        })
-        .eq("id", jobId);
-    }
-  }
-  // ... other status handling ...
-}
-
-// This utility function now requires the admin client
-export async function downloadAndStoreImage({
-  imageUrl,
-  predictionId,
-  supabaseAdmin, // Accept the admin client
-}: {
-  imageUrl: string;
-  predictionId: string;
-  supabaseAdmin: SupabaseClient; // Define its type
-}) {
-  try {
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to download image: ${response.statusText}`);
-    }
-
-    const imageBuffer = await response.arrayBuffer();
-    const filename = `${predictionId}.png`;
-
-    // Use the admin client for the storage operation
-    const { data, error } = await supabaseAdmin.storage
-      .from("generated-images")
-      .upload(filename, imageBuffer, {
-        contentType: "image/png",
-        upsert: true,
-      });
-
-    if (error) {
-      console.error("Error uploading to Supabase Storage:", error);
-      // This will re-throw the RLS error if it happens, but now it shouldn't
-      throw error; 
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabaseAdmin.storage.from("generated-images").getPublicUrl(filename);
-
-    return publicUrl;
-  } catch (error) {
-    console.error("Error in downloadAndStoreImage:", error);
-    throw new Error("Failed to upload image to storage."); // Propagate a cleaner error message
-  }
+  const { data: { publicUrl } } = supabaseAdmin.storage.from("generated-images").getPublicUrl(filename);
+  return publicUrl;
 }

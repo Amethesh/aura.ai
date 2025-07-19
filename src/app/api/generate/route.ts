@@ -2,11 +2,21 @@ import { createClient } from "@/src/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import Replicate, { Prediction } from "replicate";
-// Define the schema for the incoming request body.
+
+// It's a good practice to validate environment variables at startup
+if (!process.env.REPLICATE_API_TOKEN) {
+  throw new Error("REPLICATE_API_TOKEN is not set");
+}
+
+if (!process.env.NGROK_HOST) {
+    throw new Error("NGROK_HOST is not set. The webhook URL for Replicate will not work.");
+}
+
+
 const promptFormSchema = z.object({
-  prompt: z.string(),
+  prompt: z.string().min(1, "Prompt cannot be empty."),
   negativePrompt: z.string().optional(),
-  batchCount: z.number().min(1),
+  batchCount: z.number().min(1).max(10),
   ratio: z.string(),
   quality: z.string(),
   enhancePrompt: z.boolean(),
@@ -38,75 +48,53 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid request body", details: parseResult.error.flatten() }, { status: 400 });
     }
 
-    const formData = parseResult.data;
-    const totalCreditCost = CREDIT_COST_PER_IMAGE * formData.batchCount;
+    const { prompt, negativePrompt, batchCount, ratio, quality, enhancePrompt, conversationId: initialConversationId } = parseResult.data;
+    const totalCreditCost = CREDIT_COST_PER_IMAGE * batchCount;
 
-    // 3. Fast-Fail: Check for user profile and credits.
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("credits")
-      .eq("user_id", user.id)
-      .single();
+    // Use a Supabase Edge Function to handle the database operations as a single transaction
+    const { data, error } = await supabase.rpc('create_generation_job', {
+        user_id: user.id,
+        total_credit_cost: totalCreditCost,
+        prompt: prompt,
+        initial_conversation_id: initialConversationId
+    }).single();
 
-    if (!profile) {
-      return NextResponse.json({ error: "Could not find user profile." }, { status: 404 });
-    }
-    if (profile.credits < totalCreditCost) {
-      return NextResponse.json({ error: `Not enough credits. This request requires ${totalCreditCost} credits, but you only have ${profile.credits}.` }, { status: 402 });
-    }
-
-    // 4. Create or identify the conversation
-    let currentConversationId = formData.conversationId;
-    if (!currentConversationId) {
-        const { data: newConversation, error: convError } = await supabase
-            .from("conversations")
-            .insert({ user_id: user.id, title: formData.prompt.substring(0, 50) })
-            .select("id").single();
-        if (convError) throw convError;
-        if (!newConversation) throw new Error("Failed to create a new conversation.");
-        currentConversationId = newConversation.id;
+    if (error) {
+      if (error.code === 'PGRST116' && error.details.includes('P0001')) { 
+          return NextResponse.json({ error: error.message }, { status: 402 });
+      }
+      throw error;
     }
 
-    // 5. Create the job record in the database
-    const { data: newJob, error: jobError } = await supabase
-    .from("jobs")
-    .insert({
-      user_id: user.id,
-        credit_cost: totalCreditCost,
-      })
-      .select("id")
-      .single();
-      
-    if (jobError) throw jobError;
-    
-    if (!newJob) {
-      throw new Error("Failed to create the generation job in the database.");
-    }
-    
-    const webhookUrl = `${WEBHOOK_HOST}/api/webhooks?jobId=${newJob.id}&userId=${user.id}`;
-    
-    if (!process.env.REPLICATE_API_TOKEN) {
-      throw new Error("REPLICATE_API_TOKEN is not set");
-    }
-    
+    const { new_job_id: newJobId, returned_conversation_id: currentConversationId } = data;
+
+
+    // 5. Trigger the prediction with Replicate
+    const webhookUrl = `${WEBHOOK_HOST}/api/webhooks?jobId=${newJobId}&userId=${user.id}`;
     const options: any = {
-      model: "black-forest-labs/flux-dev",
-      input: {prompt: formData.prompt },
+      model: "black-forest-labs/flux-schnell",
+      input: {
+          prompt,
+          aspect_ratio: ratio,
+          num_outputs: batchCount,
+          negative_prompt: negativePrompt,
+          num_inference_steps: 3,
+      },
       webhook: webhookUrl,
       webhook_events_filter: ["completed"],
     };
-    
-    const prediction: Prediction = await replicate.predictions.create(options);
-    
-    console.log(prediction)
-    
+
+    const prediction = await replicate.predictions.create(options);
+
+
+    // 6. Update the job with the prediction details
     const jobParameters = {
-      prompt: formData.prompt,
-      negative_prompt: formData.negativePrompt,
-      aspect_ratio: formData.ratio,
-      num_inference_steps: formData.quality,
-      enhance_prompt: formData.enhancePrompt,
-      num_outputs: formData.batchCount,
+      prompt,
+      negative_prompt: negativePrompt,
+      aspect_ratio: ratio,
+      num_inference_steps: quality,
+      enhance_prompt: enhancePrompt,
+      num_outputs: batchCount,
       model: prediction.model,
       urls: prediction.urls,
       metrics: prediction.metrics
@@ -117,12 +105,12 @@ export async function POST(req: Request) {
     .update({
       prediction_id: prediction.id,
       job_status:    prediction.status,
-      parameters: jobParameters
+      parameters: jobParameters,
     })
-    .eq("id", newJob.id);
+    .eq("id", newJobId);
 
-     // 6. Create the user message that links to this job
-    const { data: lastMessage, error: seqError } = await supabase
+    // 7. Create the user message that links to this job
+    const { data: lastMessage } = await supabase
         .from("messages")
         .select("sequence_number")
         .eq("conversation_id", currentConversationId)
@@ -130,23 +118,21 @@ export async function POST(req: Request) {
         .limit(1)
         .single();
 
-    if (seqError && seqError.code !== "PGRST116") throw seqError;
     const nextSequenceNumber = lastMessage ? lastMessage.sequence_number + 1 : 0;
     
     await supabase.from("messages").insert({
         conversation_id: currentConversationId,
-        positive_prompt: formData.prompt,
-        negative_prompt: formData.negativePrompt,
-        triggered_job_id: newJob.id,
+        positive_prompt: prompt,
+        negative_prompt: negativePrompt,
+        triggered_job_id: newJobId,
         sequence_number: nextSequenceNumber,
     });
 
-
-    // 7. Return a success response
+    // 8. Return a success response
     return NextResponse.json({ conversationId: currentConversationId }, { status: 200 });
 
   } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error(`[Image Generation Error]: ${error.message}`);
+    return NextResponse.json({ error: "An unexpected error occurred. Please try again later." }, { status: 500 });
   }
 }
