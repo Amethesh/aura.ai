@@ -17,10 +17,10 @@ export default function ImageLayout({
 }>) {
   return (
     <main className="relative flex h-full w-full flex-row">
-      <nav className="">
+      <nav className="fixed">
         <SidebarMain />
       </nav>
-      <section className="w-full h-full">{children}</section>
+      <section className="w-full h-full ml-64">{children}</section>
     </main>
   );
 }

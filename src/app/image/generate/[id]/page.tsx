@@ -37,8 +37,8 @@ export default function ConversationPage({
 
   return (
     <section className="relative flex flex-col h-screen bg-background text-white">
-      <header className="flex gap-2 items-center p-4 text-lg font-semibold border-b border-gray-800">
-        <IconSparkles size={30} className="text-accent" />
+      <header className="absolute flex gap-2 items-center p-4 text-sm font-semibold backdrop-blur-sm ">
+        <IconSparkles size={25} className="text-accent custom-box" />
         Generate
       </header>
 

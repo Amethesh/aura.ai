@@ -116,7 +116,7 @@
   background-color: #131312;
   border: 1px solid #313131;
   border-radius: 8px;
-  box-shadow: inset 0px 0px 17.6px -4px rgba(200, 200, 200, 0.25);
+  box-shadow: inset 0px 0px 12px -4px rgba(200, 200, 200, 0.25);
 }
 
 @keyframes rainbow-flow {
@@ -173,4 +173,40 @@
 .animate-text-shimmer {
   background-size: 200% 100%;
   animation: text-shimmer 2.5s ease-in-out infinite;
+}
+/*
+  The base container styles remain mostly the same.
+  The default cursor is 'zoom-in'.
+*/
+.loupe-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  background-size: 200%; /* Adjust zoom level here */
+  background-repeat: no-repeat;
+  cursor: zoom-in;
+}
+
+/*
+  NEW: When the container has the 'is-zoomed' class,
+  we change the cursor to 'zoom-out' to indicate the reverse action.
+*/
+.loupe-container.is-zoomed {
+  cursor: zoom-out;
+}
+
+/*
+  NEW: Instead of on hover, the top image becomes transparent
+  only when the 'is-zoomed' class is present.
+*/
+.loupe-container.is-zoomed .loupe-image {
+  opacity: 0;
+}
+
+/*
+  The image transition remains the same for a smooth effect.
+*/
+.loupe-image {
+  display: block;
+  transition: opacity 0.4s ease;
 }

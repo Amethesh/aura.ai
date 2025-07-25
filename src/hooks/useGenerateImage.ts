@@ -1,14 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { MessageType } from "@/src/types/MessageType";
+import { MessageType } from "../types/BaseType";
 
 type GenerationParams = {
-  prompt: string;
-  batchCount: number;
-  ratio: string;
-  quality: string;
-  enhancePrompt: boolean;
+  parameters: Record<string, any>;
   conversationId?: string;
+  model: string;
 };
 
 const generateImage = async (formData: GenerationParams) => {
@@ -41,14 +38,11 @@ export function useGenerateImage(conversationId?: string) {
 
       const optimisticMessage: MessageType = {
         id: crypto.randomUUID(),
-        userPrompt: newGeneration.prompt,
+        userPrompt: newGeneration.parameters.prompt,
         job_status: "pending",
         output_images: [],
-        parameters: {
-          num_of_output: newGeneration.batchCount,
-          aspect_ratio: newGeneration.ratio,
-        },
-        credit_cost: newGeneration.batchCount,
+        parameters: newGeneration,
+        credit_cost: 2,
         error_message: null,
         jobId: null,
       };

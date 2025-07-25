@@ -22,18 +22,16 @@ const page = async () => {
     );
   }
   return (
-    <div className="relative w-full h-full flex flex-col bg-background overflow-y-scroll justify-center items-center">
-      <BackgroundImage />
+    <div className="relative w-full h-screen flex flex-col bg-background overflow-y-scroll items-center">
+      <BackgroundImage src="/images/generate_bg.png" width={900} height={900} />
       <div className="z-10 my-8 mt-44 flex flex-col justify-center items-center">
         <h1 className="flex items-center gap-2 font-semibold text-2xl mb-6">
           <IconSparkles /> Generate images from text and references
         </h1>
-        <InputBox  />
+        <InputBox />
       </div>
       <div className="p-2 mt-16">
-        <p className="p-2 ml-3 mb-2 flex font-medium">
-          Examples
-        </p>
+        <p className="p-2 ml-3 mb-2 flex font-medium">Examples</p>
         <ImageGallery images={images} />
       </div>
     </div>

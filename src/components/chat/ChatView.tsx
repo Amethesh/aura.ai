@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import MessageBox from "./MessageBox";
-import { MessageType } from "@/src/types/MessageType";
+import { MessageType } from "@/src/types/BaseType";
 interface ChatViewProps {
   messages: MessageType[];
 }

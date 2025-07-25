@@ -14,13 +14,9 @@ if (!process.env.NGROK_HOST) {
 
 
 const promptFormSchema = z.object({
-  prompt: z.string().min(1, "Prompt cannot be empty."),
-  negativePrompt: z.string().optional(),
-  batchCount: z.number().min(1).max(10),
-  ratio: z.string(),
-  quality: z.string(),
-  enhancePrompt: z.boolean(),
+  parameters: z.object(),
   conversationId: z.string().optional(),
+  model: z.string().optional()
 });
 
 const replicate = new Replicate({
@@ -42,20 +38,20 @@ export async function POST(req: Request) {
 
     // 2. Validate the request body
     const body = await req.json();
-    const parseResult = promptFormSchema.safeParse(body);
+    console.log("Received Request Body:", body);
+    // const parseResult = promptFormSchema.safeParse(body);
+    // console.log("Parsed Request Body:", parseResult.data);
+    // if (!parseResult.success) {
+    //   return NextResponse.json({ error: "Invalid request body", details: parseResult.error.flatten() }, { status: 400 });
+    // }
 
-    if (!parseResult.success) {
-      return NextResponse.json({ error: "Invalid request body", details: parseResult.error.flatten() }, { status: 400 });
-    }
+    const { parameters, conversationId: initialConversationId, model } = body;
+    const totalCreditCost = 2;
 
-    const { prompt, negativePrompt, batchCount, ratio, quality, enhancePrompt, conversationId: initialConversationId } = parseResult.data;
-    const totalCreditCost = CREDIT_COST_PER_IMAGE * batchCount;
-
-    // Use a Supabase Edge Function to handle the database operations as a single transaction
     const { data, error } = await supabase.rpc('create_generation_job', {
         user_id: user.id,
         total_credit_cost: totalCreditCost,
-        prompt: prompt,
+        prompt: parameters?.prompt || "",
         initial_conversation_id: initialConversationId
     }).single();
 
@@ -72,40 +68,20 @@ export async function POST(req: Request) {
     // 5. Trigger the prediction with Replicate
     const webhookUrl = `${WEBHOOK_HOST}/api/webhooks?jobId=${newJobId}&userId=${user.id}`;
     const options: any = {
-      model: "black-forest-labs/flux-schnell",
-      input: {
-          prompt,
-          aspect_ratio: ratio,
-          num_outputs: batchCount,
-          negative_prompt: negativePrompt,
-          num_inference_steps: 3,
-      },
+      model: model,
+      input: parameters,
       webhook: webhookUrl,
       webhook_events_filter: ["completed"],
     };
 
     const prediction = await replicate.predictions.create(options);
 
-
-    // 6. Update the job with the prediction details
-    const jobParameters = {
-      prompt,
-      negative_prompt: negativePrompt,
-      aspect_ratio: ratio,
-      num_inference_steps: quality,
-      enhance_prompt: enhancePrompt,
-      num_outputs: batchCount,
-      model: prediction.model,
-      urls: prediction.urls,
-      metrics: prediction.metrics
-    };
-
     await supabase
     .from("jobs")
     .update({
       prediction_id: prediction.id,
       job_status:    prediction.status,
-      parameters: jobParameters,
+      parameters: parameters,
     })
     .eq("id", newJobId);
 
@@ -122,8 +98,8 @@ export async function POST(req: Request) {
     
     await supabase.from("messages").insert({
         conversation_id: currentConversationId,
-        positive_prompt: prompt,
-        negative_prompt: negativePrompt,
+        positive_prompt: parameters.prompt,
+        negative_prompt: "",
         triggered_job_id: newJobId,
         sequence_number: nextSequenceNumber,
     });

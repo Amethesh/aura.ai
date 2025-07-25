@@ -25,7 +25,7 @@ const page = async () => {
   }
   return (
     <div className="relative w-full h-full flex flex-col bg-background overflow-y-scroll justify-center items-center">
-      <BackgroundImage />
+      <BackgroundImage src="/images/generate_bg.png" width={900} height={900} />
       <div className="z-10 my-8 mt-44 flex flex-col justify-center items-center">
         <h1 className="flex items-center gap-2 font-semibold text-2xl mb-6">
           <IconSparkles /> Generate images from text and references

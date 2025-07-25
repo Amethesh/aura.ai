@@ -1,17 +1,15 @@
 "use client";
 import {
   IconArrowUp,
-  IconChevronDown,
   IconChevronUp,
   IconClock,
   IconColorSwatch,
-  IconEdit,
   IconLayoutSidebar,
   IconSettings2,
   IconSparkles,
 } from "@tabler/icons-react";
 import { Sidebar, SidebarBody, SidebarLink } from "../ui/sidebar";
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, useEffect } from "react";
 import Image from "next/image";
 import { Edit3, ImageIcon } from "lucide-react";
 import HistoryCard from "./HistoryCard";
@@ -19,59 +17,52 @@ import clsx from "clsx";
 import { motion, AnimatePresence } from "motion/react";
 import { UserProfile } from "../UserProfile";
 import Link from "next/link";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createClient } from "@/src/lib/supabase/client";
+import { HistoryItem } from "@/src/types/BaseType";
+
+const supabase = createClient();
+const CONVERSATION_HISTORY_QUERY_KEY = ["conversationHistory"];
+
+const fetchConversationHistory = async (): Promise<HistoryItem[]> => {
+  const { data, error } = await supabase.rpc("get_conversations_with_details");
+
+  if (error) {
+    console.error("Error fetching conversation history:", error);
+    throw new Error("Could not fetch conversation history");
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error("Unexpected response format from RPC");
+  }
+
+  return data as unknown as HistoryItem[];
+};
 
 const links = [
   {
-    label: "Library",
-    href: "#",
+    label: "library",
+    href: "/library",
     icon: <IconColorSwatch className="h-5 w-5 shrink-0" />,
   },
 ];
 
 const menuItems = [
   {
-    icon: <IconSparkles className="h-5 w-5" />,
+    icon: <IconSparkles size={15} />,
     label: "Generate",
-    color: "text-accent",
   },
   {
-    icon: <Edit3 className="h-5 w-5" />,
+    icon: <Edit3 size={15} />,
     label: "Edit",
-    color: "text-gray-500",
   },
   {
-    icon: <IconArrowUp className="h-5 w-5" />,
+    icon: <IconArrowUp size={15} />,
     label: "Upscale",
-    color: "text-gray-500",
   },
   {
-    icon: <IconSettings2 className="h-5 w-5" />,
+    icon: <IconSettings2 size={15} />,
     label: "Prepare",
-    color: "text-gray-500",
-  },
-];
-
-const historyData = [
-  {
-    id: 1,
-    imageUrl:
-      "https://rh-images.xiaoyaoyou.com/de341d98bcc516a1e9639e4abeb44e9f/output/ComfyUI_00008_qrfsy_1751710630.png",
-    title: "Image Generation",
-    prompt: "Create an anime eyes with green and detailed highlights.",
-  },
-  {
-    id: 2,
-    imageUrl:
-      "https://rh-images.xiaoyaoyou.com/de341d98bcc516a1e9639e4abeb44e9f/output/ComfyUI_00200_gkvsq_1751205394.png?imageMogr2/format/jpeg/ignore-error/1",
-    title: "Image Upscale",
-    prompt: "Upscale a fantasy landscape with a dragon flying over mountains.",
-  },
-  {
-    id: 3,
-    imageUrl:
-      "https://rh-images.xiaoyaoyou.com/de341d98bcc516a1e9639e4abeb44e9f/output/ComfyUI_00166_rrvdk_1750845610.png?imageMogr2/format/jpeg/ignore-error/1",
-    title: "Image Edit",
-    prompt: "Remove the background from a portrait photo.",
   },
 ];
 
@@ -80,7 +71,7 @@ const CollapsibleSection = ({
   icon,
   children,
   defaultOpen = false,
-  className = "", // Allow passing extra classes
+  className = "",
 }: {
   title: string;
   icon: ReactNode;
@@ -100,7 +91,7 @@ const CollapsibleSection = ({
       >
         <div className="flex items-center gap-2">
           {icon}
-          <span className="text-sm">{title}</span>
+          <span className="text-sm tracking-wide">{title}</span>
         </div>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
@@ -124,7 +115,7 @@ const CollapsibleSection = ({
               height: { duration: 0.3, ease: "easeInOut" },
               opacity: { duration: 0.2, ease: "easeInOut" },
             }}
-            className="min-h-0 flex-1"
+            className="min-h-0 flex-1 tracking-wide"
           >
             {children}
           </motion.div>
@@ -137,10 +128,37 @@ const CollapsibleSection = ({
 export default function SidebarMain() {
   const [open, setOpen] = useState(true);
   const [hovered, setHovered] = useState(false);
+  const queryClient = useQueryClient();
 
-  const iconContainerStyle = {
-    boxShadow: "inset 0px 0px 17.6px -4px rgba(200, 200, 200, 0.25)",
-  };
+  const {
+    data: historyData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<HistoryItem[], Error>({
+    queryKey: CONVERSATION_HISTORY_QUERY_KEY,
+    queryFn: fetchConversationHistory,
+  });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("public:conversations")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "conversations" },
+        (payload) => {
+          console.log("New conversation inserted (realtime):", payload.new);
+          queryClient.invalidateQueries({
+            queryKey: CONVERSATION_HISTORY_QUERY_KEY,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   return (
     <div className="flex h-screen text-sidebar-foreground">
@@ -155,7 +173,7 @@ export default function SidebarMain() {
                   onMouseEnter={() => setHovered(true)}
                   onMouseLeave={() => setHovered(false)}
                 >
-                  <div className="relative h-[25px] w-[25px]">
+                  <div className="relative h-[20px] w-[20px]">
                     <Image
                       src="/images/logo.png"
                       alt="Aura.ai Logo"
@@ -181,7 +199,7 @@ export default function SidebarMain() {
                   </div>
                 </div>
                 {open && (
-                  <p className="text-3xl font-bold">
+                  <p className="text-2xl font-bold">
                     Aura<span className="text-accent">.</span>ai
                   </p>
                 )}
@@ -192,24 +210,24 @@ export default function SidebarMain() {
                   className="cursor-pointer rounded-lg p-1 text-neutral-200 transition-colors hover:text-accent"
                   aria-label="Collapse sidebar"
                 >
-                  <IconLayoutSidebar />
+                  <IconLayoutSidebar size={20} />
                 </button>
               )}
             </div>
 
             {/* Links and Sections */}
-            <div className="mt-8 flex flex-shrink-0 flex-col gap-2">
+            <div className="mt-4 flex flex-shrink-0 flex-col gap-2">
               {links.map((link, idx) => (
                 <SidebarLink key={idx} link={link} />
               ))}
 
               <CollapsibleSection
                 title="Image"
-                icon={<ImageIcon className="p-0.5" />}
+                icon={<ImageIcon className="p-1" />}
                 defaultOpen={true}
               >
                 <motion.div
-                  className="border-l-2 border-gray-700 ml-2"
+                  className="ml-2 border-l-2 border-gray-700"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
@@ -220,7 +238,7 @@ export default function SidebarMain() {
                       href={`/image/${item.label.toLowerCase()}`}
                     >
                       <motion.div
-                        className="flex cursor-pointer items-center gap-4 p-2 pl-5"
+                        className="flex cursor-pointer items-center gap-2 pb-3 pl-3"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{
@@ -229,15 +247,8 @@ export default function SidebarMain() {
                         }}
                         whileHover={{ x: 5, transition: { duration: 0.2 } }}
                       >
-                        <div
-                          className="p-1 bg-[#131312] border border-[#313131] rounded-[8px]"
-                          style={iconContainerStyle}
-                        >
-                          {item.icon}
-                        </div>
-                        <span className={`text-sm ${item.color}`}>
-                          {item.label}
-                        </span>
+                        <div className="custom-box">{item.icon}</div>
+                        <span className={`text-sm`}>{item.label}</span>
                       </motion.div>
                     </Link>
                   ))}
@@ -249,45 +260,67 @@ export default function SidebarMain() {
             <CollapsibleSection
               title="Generation History"
               icon={<IconClock className="p-0.5" />}
-              className="flex-1 min-h-0"
+              className="min-h-0 flex-1"
               defaultOpen={true}
             >
               <div className="h-full overflow-y-auto pr-2 pb-20 hide-scrollbar">
-                <motion.div
-                  className="flex flex-col gap-2 py-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                >
-                  {historyData.map((history, index) => (
+                {isLoading && (
+                  <p className="py-2 pl-3 text-sm text-neutral-400">
+                    Loading history...
+                  </p>
+                )}
+                {isError && (
+                  <p className="py-2 pl-3 text-sm text-red-400">
+                    Error: {error?.message}
+                  </p>
+                )}
+                {!isLoading && !isError && historyData?.length === 0 && (
+                  <p className="py-2 pl-3 text-sm text-neutral-400">
+                    No history found.
+                  </p>
+                )}
+                {!isLoading &&
+                  !isError &&
+                  historyData &&
+                  historyData.length > 0 && (
                     <motion.div
-                      key={history.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.3,
-                        delay: 0.1 + index * 0.05,
-                        ease: "easeOut",
-                      }}
-                      whileHover={{
-                        scale: 1.02,
-                        transition: { duration: 0.2 },
-                      }}
+                      className="flex flex-col gap-2 py-2"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
                     >
-                      <HistoryCard
-                        imageUrl={history.imageUrl}
-                        title={history.title}
-                        prompt={history.prompt}
-                      />
+                      {historyData.map((history, index) => (
+                        <motion.div
+                          key={history.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            duration: 0.3,
+                            delay: 0.1 + index * 0.05,
+                            ease: "easeOut",
+                          }}
+                          whileHover={{
+                            scale: 1.02,
+                            transition: { duration: 0.2 },
+                          }}
+                        >
+                          <Link href={`/image/generate/${history.id}`}>
+                            <HistoryCard
+                              imageUrl={history.imageUrl}
+                              title={history.title}
+                              prompt={history.prompt}
+                            />
+                          </Link>
+                        </motion.div>
+                      ))}
                     </motion.div>
-                  ))}
-                </motion.div>
+                  )}
               </div>
             </CollapsibleSection>
           </div>
 
           {/* Footer */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 pt-1 bg-gradient-to-t from-black to-transparent backdrop-blur-sm">
+          <div className="absolute bottom-0 left-0 right-0 p-4 pt-1 backdrop-blur-sm bg-gradient-to-t from-black to-transparent">
             <UserProfile />
           </div>
         </SidebarBody>

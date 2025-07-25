@@ -1,7 +1,7 @@
 "use client";
 import ImageCard from "@/src/components/ui/ImageCard";
-import { IconUser } from "@tabler/icons-react";
-import { MessageType } from "@/src/types/MessageType";
+import { IconDownload, IconRefresh, IconUser } from "@tabler/icons-react";
+import { MessageType } from "@/src/types/BaseType";
 import { ImageCardLoading } from "../ui/ImageCardLoading";
 // Omitted IconDownload, IconRefresh for brevity
 
@@ -31,18 +31,13 @@ export default function MessageBox({ message }: MessageBoxProps) {
 
   return (
     <div className="w-full max-w-4xl">
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-black flex items-center justify-center">
-          <IconUser size={20} />
-        </div>
-        <p className="text-lg pt-1">{userPrompt}</p>
-      </div>
+      <p className="text-lg pt-1 ml-8">{userPrompt}</p>
 
       <div className="mt-4 pl-12">
-        <div className="max-w-[40vw] flex gap-4 border-l-2 border-gray-700 p-4">
+        <div className="flex gap-4 border-l-2 border-gray-700 p-4 pt-0">
           {job_status === "succeeded" && output_images.length > 0 ? (
             output_images.map((image, index) => (
-              <div key={image.imageUrl || index} className="max-w-72">
+              <div key={image.imageUrl || index} className="max-w-[330px]">
                 <ImageCard
                   imageUrl={image.imageUrl}
                   width={800}
@@ -65,12 +60,16 @@ export default function MessageBox({ message }: MessageBoxProps) {
               />
             ))
           ) : job_status === "failed" ? (
-            <p className="text-red-500 font-semibold">
+            <p className="text-red-500 font-semibold">``
               ❌ Generation failed: {error_message || "Unknown error."}
             </p>
           ) : null}
         </div>
-        {/* Omitted buttons for brevity */}
+        <div className="flex gap-3 mt-2">
+          <IconDownload className="custom-box" />
+          <IconRefresh className="custom-box" />
+          
+        </div>
       </div>
     </div>
   );

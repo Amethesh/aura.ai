@@ -32,7 +32,7 @@ const AnimatedCounter = ({
 
   return (
     <div className="flex flex-col justify-center items-center ml-2 gap-4">
-      <p className="text-sm text-gray-300 font-medium tracking-wide">{label}</p>
+      <p className="text-xs text-gray-300 font-medium tracking-wide">{label}</p>
 
       <div className="relative w-16 h-8 bg-[#131312] border border-[#313131] shadow-[inset_0px_0px_12px_-4px_rgba(200,200,200,0.25)] rounded-lg text-sm flex items-center justify-center p-1 transition-all duration-300 hover:border-[#404040] hover:shadow-[inset_0px_0px_16px_-4px_rgba(200,200,200,0.35)]">
         {/* Minus Button */}

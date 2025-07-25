@@ -27,8 +27,28 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [isModalImageLoading, setIsModalImageLoading] = useState(true);
 
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [backgroundPosition, setBackgroundPosition] = useState("50% 50%");
+
+  const handleClick = () => {
+    setIsZoomed(!isZoomed);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!isZoomed) return;
+
+    const { left, top, width, height } =
+      e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setBackgroundPosition(`${x}% ${y}%`);
+  };
+
   const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => {
+    setIsZoomed(false);
+    setIsModalOpen(false);
+  };
 
   const cardOverlayVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
@@ -69,7 +89,7 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
   return (
     <>
       <motion.div
-        className="relative w-full rounded-[24px] overflow-hidden cursor-pointer border-2 border-white/30"
+        className="relative w-full rounded-[24px] overflow-hidden cursor-pointer"
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
         whileHover={{ scale: 1.02 }}
@@ -120,6 +140,7 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
             onLoad={handleImageLoad}
             onError={() => setIsImageLoading(false)}
           />
+          <div className="absolute inset-0 rounded-[24px] border-2 border-white/30 pointer-events-none z-10"></div>
         </div>
 
         <AnimatePresence>
@@ -166,7 +187,6 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
             exit={{ opacity: 0 }}
             onClick={handleModalBackdropClick}
           >
-            {/* Modal Content */}
             <div
               className="relative w-full h-full flex flex-col"
               onClick={(e) => e.stopPropagation()}
@@ -204,17 +224,15 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
                 </div>
               </motion.header>
 
-              {/* Main Image */}
               <div
                 className="flex-1 flex items-center justify-center my-4 min-h-0"
                 onClick={handleModalBackdropClick}
               >
                 <motion.div
-                  className="relative max-w-[90vw] max-h-[70vh] w-auto h-auto"
+                  className="relative max-w-[90vw] max-h-[80vh] w-auto h-auto"
                   layoutId={`card-container-${imageUrl}`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Modal Loading Animation */}
                   <AnimatePresence>
                     {isImageLoading && (
                       <motion.div
@@ -242,19 +260,29 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
                     )}
                   </AnimatePresence>
 
-                  <Image
-                    src={imageUrl}
-                    alt={prompt}
-                    width={width}
-                    height={height}
-                    className="rounded-[28px] max-w-[90vw] max-h-[70vh] w-auto h-auto object-contain"
-                    onLoad={handleModalImageLoad}
-                    onError={() => setIsModalImageLoading(false)}
-                  />
+                  <figure
+                    className={`loupe-container ${isZoomed ? "is-zoomed" : ""}`}
+                    onClick={handleClick}
+                    onMouseMove={handleMouseMove}
+                    style={{
+                      backgroundImage: `url(${imageUrl})`,
+                      backgroundPosition: backgroundPosition,
+                    }}
+                  >
+                    <Image
+                      src={imageUrl}
+                      alt={prompt}
+                      width={width}
+                      height={height}
+                      className="loupe-image w-full h-full max-h-[80vh] object-contain"
+                      onLoad={handleModalImageLoad}
+                      onError={() => setIsModalImageLoading(false)}
+                    />
+                  </figure>
+                  <div className="absolute inset-0 rounded-[24px] border-2 border-white/30 pointer-events-none z-10"></div>
                 </motion.div>
               </div>
 
-              {/* Bottom Bar */}
               <motion.footer
                 className="flex justify-between items-end text-white w-full"
                 initial={{ y: 50, opacity: 0 }}

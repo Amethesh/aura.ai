@@ -3,7 +3,13 @@ import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useEffect } from "react";
 
-const BackgroundImage = () => {
+interface BackgroundImageProps {
+  src: string;
+  width: number;
+  height: number;
+}
+
+const BackgroundImage = ({ src, width, height }: BackgroundImageProps) => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -38,12 +44,7 @@ const BackgroundImage = () => {
         rotate: 16,
       }}
     >
-      <Image
-        src="/images/generate_bg.png"
-        alt="Plus BG"
-        width={900}
-        height={900}
-      />
+      <Image src={src} alt="Background Image" width={width} height={height} />
     </motion.div>
   );
 };

@@ -1,14 +1,7 @@
 "use client";
 import Masonry from "react-masonry-css";
 import ImageCard from "../ui/ImageCard";
-export interface ImageCardType {
-  id: number;
-  image_url: string;
-  prompt: string;
-  width: number;
-  height: number;
-  blurhash: string;
-}
+import { ImageCardType } from "@/src/types/BaseType";
 
 type ImageGalleryProps = {
   images: ImageCardType[] | null;
@@ -35,9 +28,8 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
           key={image.id}
           imageUrl={image.image_url}
           prompt={image.prompt}
-          width={image.width}
-          height={image.height}
-          // blurhash={image.blurhash}
+          width={800}
+          height={800}
         />
       ))}
     </Masonry>
