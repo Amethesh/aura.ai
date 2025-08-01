@@ -184,7 +184,8 @@
   border-radius: 28px;
   background-size: 200%; /* Adjust zoom level here */
   background-repeat: no-repeat;
-  cursor: zoom-in;
+  /* cursor: zoom-in; */
+  cursor: url(/cursors/zoom-in.svg) 16 16, auto;
 }
 
 /*
@@ -193,6 +194,7 @@
 */
 .loupe-container.is-zoomed {
   cursor: zoom-out;
+  cursor: url(/cursors/zoom-out.svg) 16 16, auto;
 }
 
 /*

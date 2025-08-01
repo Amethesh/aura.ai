@@ -60,18 +60,6 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
     exit: { opacity: 0, y: 30, transition: { duration: 0.3, ease: "easeIn" } },
   };
 
-  const pulseVariants: Variants = {
-    pulse: {
-      scale: [1, 1.05, 1],
-      opacity: [0.5, 0.8, 0.5],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
-    },
-  };
-
   const handleImageLoad = () => {
     setIsImageLoading(false);
   };

@@ -8,12 +8,11 @@ interface ChatViewProps {
 export default function ChatView({ messages }: ChatViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
-  // Detect if the user has scrolled up
+
   const handleScroll = () => {
     const container = scrollContainerRef.current;
     if (container) {
-      // A small threshold to prevent floating point inaccuracies
-      const isAtBottom =
+      const isAtBottom = 
         container.scrollHeight - container.scrollTop <=
         container.clientHeight + 5;
       setUserHasScrolled(!isAtBottom);
@@ -27,7 +26,6 @@ export default function ChatView({ messages }: ChatViewProps) {
     }
   }, []);
   useEffect(() => {
-    // Only auto-scroll if the user hasn't scrolled up
     if (scrollContainerRef.current && !userHasScrolled) {
       scrollContainerRef.current.children[0]?.scrollIntoView({
         behavior: "smooth",
@@ -35,6 +33,7 @@ export default function ChatView({ messages }: ChatViewProps) {
       });
     }
   }, [messages, userHasScrolled]);
+
   return (
     <div
       ref={scrollContainerRef}

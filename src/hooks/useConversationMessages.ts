@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/src/lib/supabase/client";
-import { MessageType } from "@/src/types/MessageType";
+import { MessageType } from "@/src/types/BaseType";
 import { useEffect } from "react";
 
 export function useConversationMessages(conversationId: string) {
@@ -8,7 +8,7 @@ export function useConversationMessages(conversationId: string) {
   const queryClient = useQueryClient();
   const queryKey = ["messages", conversationId];
 
-  const { data: messages = [], isLoading, isError } = useQuery<MessageType[]>({
+  const { data: messages = [], isLoading, isError } = useQuery({
     queryKey: queryKey,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_conversation_messages", {

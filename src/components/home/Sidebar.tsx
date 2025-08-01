@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/src/lib/supabase/client";
 import { HistoryItem } from "@/src/types/BaseType";
+import { usePathname } from "next/navigation";
 
 const supabase = createClient();
 const CONVERSATION_HISTORY_QUERY_KEY = ["conversationHistory"];
@@ -129,6 +130,7 @@ export default function SidebarMain() {
   const [open, setOpen] = useState(true);
   const [hovered, setHovered] = useState(false);
   const queryClient = useQueryClient();
+  const pathname = usePathname();
 
   const {
     data: historyData,
@@ -217,9 +219,17 @@ export default function SidebarMain() {
 
             {/* Links and Sections */}
             <div className="mt-4 flex flex-shrink-0 flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
+              {links.map((link, idx) => {
+                const href = `/${link.label.toLowerCase()}`;
+                const isActive = pathname.startsWith(href);
+                return (
+                  <SidebarLink
+                    key={idx}
+                    link={link}
+                    className={isActive ? "text-accent" : ""}
+                  />
+                );
+              })}
 
               <CollapsibleSection
                 title="Image"
@@ -232,26 +242,37 @@ export default function SidebarMain() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
                 >
-                  {menuItems.map((item, index) => (
-                    <Link
-                      key={index}
-                      href={`/image/${item.label.toLowerCase()}`}
-                    >
-                      <motion.div
-                        className="flex cursor-pointer items-center gap-2 pb-3 pl-3"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                          duration: 0.3,
-                          delay: 0.1 + index * 0.05,
-                        }}
-                        whileHover={{ x: 5, transition: { duration: 0.2 } }}
-                      >
-                        <div className="custom-box">{item.icon}</div>
-                        <span className={`text-sm`}>{item.label}</span>
-                      </motion.div>
-                    </Link>
-                  ))}
+                  {menuItems.map((item, index) => {
+                    const href = `/image/${item.label.toLowerCase()}`;
+                    const isActive = pathname.startsWith(href);
+
+                    return (
+                      <Link key={index} href={href}>
+                        <motion.div
+                          className={clsx(
+                            "flex cursor-pointer items-center gap-2 pb-3 pl-3",
+                            { "text-accent": isActive }
+                          )}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{
+                            duration: 0.3,
+                            delay: 0.1 + index * 0.05,
+                          }}
+                          whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                        >
+                          <div
+                            className={clsx("custom-box", {
+                              "text-accent": isActive,
+                            })}
+                          >
+                            {item.icon}
+                          </div>
+                          <span className="text-sm">{item.label}</span>
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
                 </motion.div>
               </CollapsibleSection>
             </div>
@@ -318,8 +339,6 @@ export default function SidebarMain() {
               </div>
             </CollapsibleSection>
           </div>
-
-          {/* Footer */}
           <div className="absolute bottom-0 left-0 right-0 p-4 pt-1 backdrop-blur-sm bg-gradient-to-t from-black to-transparent">
             <UserProfile />
           </div>
