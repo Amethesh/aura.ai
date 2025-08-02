@@ -174,10 +174,7 @@
   background-size: 200% 100%;
   animation: text-shimmer 2.5s ease-in-out infinite;
 }
-/*
-  The base container styles remain mostly the same.
-  The default cursor is 'zoom-in'.
-*/
+
 .loupe-container {
   position: relative;
   overflow: hidden;
@@ -188,27 +185,76 @@
   cursor: url(/cursors/zoom-in.svg) 16 16, auto;
 }
 
-/*
-  NEW: When the container has the 'is-zoomed' class,
-  we change the cursor to 'zoom-out' to indicate the reverse action.
-*/
 .loupe-container.is-zoomed {
   cursor: zoom-out;
   cursor: url(/cursors/zoom-out.svg) 16 16, auto;
 }
 
-/*
-  NEW: Instead of on hover, the top image becomes transparent
-  only when the 'is-zoomed' class is present.
-*/
 .loupe-container.is-zoomed .loupe-image {
   opacity: 0;
 }
 
-/*
-  The image transition remains the same for a smooth effect.
-*/
 .loupe-image {
   display: block;
   transition: opacity 0.4s ease;
+}
+
+.progressive-blur-overlay {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
+  -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
+}
+
+/* Hide scrollbar while maintaining scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* Smooth scrolling behavior */
+.scrollbar-hide {
+  scroll-behavior: smooth;
+}
+
+/* Optional: Add custom scrollbar if you want it visible */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* In your global CSS file */
+.embla {
+  overflow: hidden;
+}
+.embla__container {
+  display: flex;
+  /* The following are optional but recommended */
+  user-select: none;
+  -webkit-touch-callout: none;
+  -khtml-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.embla__slide {
+  flex: 0 0 auto; /* This is crucial */
+  min-width: 0;
+  position: relative;
 }

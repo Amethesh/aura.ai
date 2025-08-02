@@ -9,48 +9,72 @@ import {
   useSpring,
   useTransform,
   useMotionTemplate,
+  MotionValue,
 } from "motion/react";
 
-// --- Props Interface ---
-interface ImageCardProProps {
+interface ImageCard3DProps {
   bottomImageUrl: string;
   topImageUrl: string;
   cardText: string;
-  // Make the effect strength configurable!
+  scrollVelocity: MotionValue<number>;
   rotateDepth?: number;
   parallaxDepth?: number;
+  width?: number;
+  height?: number;
+  topImageScale?: number;
+  fontSize?: number;
 }
 
 export const ImageCard3D = ({
   bottomImageUrl,
   topImageUrl,
   cardText,
+  scrollVelocity,
   rotateDepth = 15,
   parallaxDepth = 25,
-}: ImageCardProProps) => {
+  width = 500,
+  height = 700,
+  topImageScale = 1.1,
+  fontSize = 20,
+}: ImageCard3DProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
-  // --- Spring-based Motion Logic from your example ---
+  // --- MOUSE-BASED Motion Logic (existing) ---
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-
-  // Wrap motion values in springs for smooth transitions
   const mouseXSpring = useSpring(x, { stiffness: 300, damping: 20 });
   const mouseYSpring = useSpring(y, { stiffness: 300, damping: 20 });
 
-  // 1. Transform for Card Rotation
-  const rotateX = useTransform(
+  // Transform for Card Rotation based on MOUSE position (output numbers)
+  const mouseRotateX = useTransform(
     mouseYSpring,
     [-0.5, 0.5],
-    [`${rotateDepth}deg`, `-${rotateDepth}deg`] // Invert for natural feel
+    [rotateDepth, -rotateDepth]
   );
-  const rotateY = useTransform(
+  const mouseRotateY = useTransform(
     mouseXSpring,
     [-0.5, 0.5],
-    [`-${rotateDepth}deg`, `${rotateDepth}deg`]
+    [-rotateDepth, rotateDepth]
   );
 
-  // 2. Transform for Inner Layer Parallax
+    const scrollVelocitySpring = useSpring(scrollVelocity, {
+      stiffness: 400,
+      damping: 50,
+    });
+
+  // 4. Transform the smoothed velocity into a Y-axis rotation value
+  const scrollRotateY = useTransform(
+    scrollVelocitySpring,
+    [-50, 50], // Input range: from fast left scroll to fast right scroll
+    [-12, 12] // Output range: tilt the card up to 12 degrees
+  );
+
+  // --- COMBINED Transform ---
+  // 5. Use useMotionTemplate to combine mouse and scroll rotations into one transform string.
+  // This is the cleanest way to apply multiple, independent transforms.
+  const transform = useMotionTemplate`perspective(1200px) rotateX(${mouseRotateX}deg) rotateY(${mouseRotateY}deg) rotateY(${scrollRotateY}deg)`;
+
+  // ... (Parallax and Glare logic remains the same)
   const topImageTranslateX = useTransform(
     mouseXSpring,
     [-0.5, 0.5],
@@ -72,16 +96,13 @@ export const ImageCard3D = ({
     [`-${parallaxDepth * 1.5}px`, `${parallaxDepth * 1.5}px`]
   );
 
-  // 3. Transform for the Glossy Glare Effect
   const glareX = useTransform(mouseXSpring, [-0.7, 0.7], [0, 100]);
   const glareY = useTransform(mouseYSpring, [-0.7, 0.7], [0, 100]);
   const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.3) 0%, transparent 50%)`;
 
-  // --- Event Handlers ---
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    // Calculate mouse position as a percentage from the center
     const xPct = (e.clientX - rect.left) / rect.width - 0.5;
     const yPct = (e.clientY - rect.top) / rect.height - 0.5;
     x.set(xPct);
@@ -94,16 +115,19 @@ export const ImageCard3D = ({
   };
 
   return (
-    // A. Perspective wrapper to create the 3D space
-    <div className="flex items-center justify-center [perspective:1200px]">
-      {/* B. Main rotating card container */}
+    <div className="flex items-center justify-center">
       <motion.div
         ref={ref}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        style={{ rotateX, rotateY }}
+        // 6. Apply the combined transform. Remove individual rotateX/Y.
+        style={{
+          transform: transform, // Apply the combined motion template
+          width: `${width}px`,
+          height: `${height}px`,
+        }}
         whileHover={{ scale: 1.05, transition: { type: "spring" } }}
-        className="relative w-[581px] h-[775px] rounded-[26px] [transform-style:preserve-3d]"
+        className="relative rounded-[26px] [transform-style:preserve-3d]"
       >
         {/* C. Card Layers (Children) */}
 
@@ -112,7 +136,6 @@ export const ImageCard3D = ({
           className="absolute inset-0 w-full h-full rounded-[26px] bg-cover bg-center shadow-2xl"
           style={{
             backgroundImage: `url(${bottomImageUrl})`,
-            // Placing the complex shadow here is cleaner
             boxShadow:
               "rgba(0, 0, 0, 0.1) 0px 40px 100px 0px, rgba(0, 0, 0, 0.2) 0px 20px 60px 0px",
           }}
@@ -125,21 +148,20 @@ export const ImageCard3D = ({
             backgroundImage: `url(${topImageUrl})`,
             translateX: topImageTranslateX,
             translateY: topImageTranslateY,
-            // Pop it out towards the viewer on hover
-            scale: 1.1,
+            scale: topImageScale,
             z: 40,
           }}
         />
 
         {/* Layer 3: Text (Parallax) */}
         <motion.p
-          className="absolute left-[254px] top-[722px] w-[126px] h-[49px] font-['Century_Gothic'] text-[40px] font-bold text-white text-opacity-80"
+          className="absolute bottom-0 -right-1/2 w-full font-gothic font-bold text-white text-opacity-80"
           style={{
             translateX: textTranslateX,
             translateY: textTranslateY,
-            // Pop it out even further on hover
             scale: 1.2,
             z: 60,
+            fontSize: `${fontSize}px`,
           }}
         >
           {cardText}

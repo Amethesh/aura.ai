@@ -53,3 +53,15 @@ export interface InputBoxParameter {
   "x-order"?: number;
   format?: string
 }
+
+export interface ImageCard3DType {
+  bottomImageUrl: string;
+  topImageUrl: string;
+  cardText: string;
+  rotateDepth?: number;
+  parallaxDepth?: number;
+  width?: number;
+  height?: number;
+  topImageScale?: number;
+  fontSize?: number;
+}

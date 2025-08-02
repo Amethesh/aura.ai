@@ -39,7 +39,6 @@ export function NavbarLander() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    
       <Navbar>
         <NavBody>
           <NavbarLogo />
@@ -92,12 +91,11 @@ export function NavbarLander() {
                 variant="primary"
                 className="w-full"
               >
-                Book a call
+                Create Now
               </NavbarButton>
             </div>
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
-
   );
 }
