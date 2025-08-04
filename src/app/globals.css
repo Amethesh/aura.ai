@@ -76,6 +76,39 @@
   }
 }
 
+@layer utilities {
+  .scroller {
+    --animation-direction: forwards;
+    --animation-duration: 40s;
+  }
+
+  /* Horizontal Scroll Animation */
+  .animate-scroll-x {
+    animation: scroll-x var(--animation-duration) linear infinite
+      var(--animation-direction);
+  }
+  @keyframes scroll-x {
+    to {
+      transform: translateX(
+        calc(-50% - 1.5rem)
+      ); /* 1.5rem is half the gap-12 */
+    }
+  }
+
+  /* Vertical Scroll Animation */
+  .animate-scroll-y {
+    animation: scroll-y var(--animation-duration) linear infinite
+      var(--animation-direction);
+  }
+  @keyframes scroll-y {
+    to {
+      transform: translateY(
+        calc(-50% - 1.5rem)
+      ); /* 1.5rem is half the gap-12 */
+    }
+  }
+}
+
 *::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0.3);
   background-color: none;

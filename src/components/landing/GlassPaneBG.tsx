@@ -35,7 +35,7 @@ const GlassPaneBG: React.FC<GlassModalProps> = ({
   }, [paneWidth]);
 
   const glassItemClasses = [
-    "bg-[linear-gradient(90deg,rgba(22,22,24,0.3)_0%,rgba(0,0,0,0.3)_17%,rgba(26,26,29,0.01)_100%)]",
+    "bg-[linear-gradient(90deg,rgba(22,22,24,0.3)_0%,rgba(0,0,0,0.3)_1%,rgba(26,26,29,0.01)_100%)]",
     "shadow-[inset_0_2px_4px_rgba(255,255,255,0.16)]",
     "backdrop-blur-[20px]",
   ].join(" ");
@@ -43,18 +43,12 @@ const GlassPaneBG: React.FC<GlassModalProps> = ({
   const glassPanes = Array.from({ length: paneCount }, (_, index) => {
     const isFirst = index === 0;
     const isLast = index === paneCount - 1;
-
-    const radiusClasses = [
-      isFirst ? "rounded-l-[26px]" : "",
-      isLast ? "rounded-r-[26px]" : "",
-    ].join(" ");
-
     return (
       <li
         key={index}
         // CRITICAL CHANGE: We use `h-full` to make the pane stretch
         // to the height of its parent `<ul>`. No inline style for height.
-        className={`${glassItemClasses} ${radiusClasses} h-full`}
+        className={`${glassItemClasses} h-full`}
         style={{ width: `${paneWidth}px` }}
       ></li>
     );
@@ -65,7 +59,7 @@ const GlassPaneBG: React.FC<GlassModalProps> = ({
     //    by the `children` inside it.
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden ${className}`}
+      className={`relative w-full  ${className}`}
     >
       {/* 2. The glass panes are in an absolute-positioned `<ul>` that stretches
           to the full size of the relative parent (`inset-0` is a shortcut

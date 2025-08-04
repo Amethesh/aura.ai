@@ -130,11 +130,11 @@ const purple = {
 };
 
 const green = {
-  primary: "#4ADE80", 
+  primary: "#4ADE80",
   secondary: "#34D399",
   accent1: "#D9F99D",
   accent2: "#ECFDF5",
-  accent3: "#86EFAC", 
+  accent3: "#86EFAC",
   highlight1: "#15803D",
   highlight2: "#65A30D",
 };
@@ -149,28 +149,32 @@ const gold = {
   highlight2: "#FFB300",
 };
 
-
 const Hero = () => {
-  
   return (
     <div className="relative w-full overflow-hidden">
-      <div className="-mt-10 h-[105vh] relative">
+      <div>
+        <p className="text-[60px] font-bold z- absolute top-24 left-0 text- ml-12">
+          Generate and edit high
+        </p>
+        <p className="text-[60px] font-bold z-10 absolute top-24 right-0 text- ">
+          quality images in seconds!
+        </p>
+      </div>
+      <div className="relative -mt-10 h-[105vh]">
         <Image
-          className="h-full w-full object-scale-down z-[-1]"
-          src={"/images/landing/hero2.png"}
+          className="h-full w-full object-scale-down"
+          src={"/images/landing/hero3.png"}
           width={800}
           height={800}
           alt="Cover of an high quality AI images"
         />
-        <div
-          className="z-10 absolute inset-x-0 bottom-0 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm"
-        />
+        <div className="z-10 absolute inset-x-0 bottom-0 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
         <div className="absolute inset-x-0 bottom-32 z-10 w-screen flex justify-center">
           <InputBox />
         </div>
       </div>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-[-1]">
-        <GradientComponent colors={black} sizeVW={150} />
+        <GradientComponent colors={red} sizeVW={150} />
       </div>
       <div className="relative w-full h-full">
         <GlassPaneBG paneWidth={50}>

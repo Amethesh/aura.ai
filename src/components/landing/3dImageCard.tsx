@@ -16,7 +16,7 @@ interface ImageCard3DProps {
   bottomImageUrl: string;
   topImageUrl: string;
   cardText: string;
-  scrollVelocity: MotionValue<number>;
+  scrollVelocity?: MotionValue<number>;
   rotateDepth?: number;
   parallaxDepth?: number;
   width?: number;
@@ -57,7 +57,7 @@ export const ImageCard3D = ({
     [-rotateDepth, rotateDepth]
   );
 
-    const scrollVelocitySpring = useSpring(scrollVelocity, {
+    const scrollVelocitySpring = useSpring(scrollVelocity ?? x, {
       stiffness: 400,
       damping: 50,
     });
@@ -98,7 +98,7 @@ export const ImageCard3D = ({
 
   const glareX = useTransform(mouseXSpring, [-0.7, 0.7], [0, 100]);
   const glareY = useTransform(mouseYSpring, [-0.7, 0.7], [0, 100]);
-  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.3) 0%, transparent 50%)`;
+  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 1) 0%, transparent 30%)`;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -120,24 +120,22 @@ export const ImageCard3D = ({
         ref={ref}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        // 6. Apply the combined transform. Remove individual rotateX/Y.
         style={{
-          transform: transform, // Apply the combined motion template
+          transform: transform,
           width: `${width}px`,
           height: `${height}px`,
         }}
         whileHover={{ scale: 1.05, transition: { type: "spring" } }}
         className="relative rounded-[26px] [transform-style:preserve-3d]"
       >
-        {/* C. Card Layers (Children) */}
 
         {/* Layer 1: Bottom Image (Static) */}
         <div
-          className="absolute inset-0 w-full h-full rounded-[26px] bg-cover bg-center shadow-2xl"
+          className="absolute inset-0 w-full h-full rounded-[26px] bg-cover bg-center"
           style={{
             backgroundImage: `url(${bottomImageUrl})`,
             boxShadow:
-              "rgba(0, 0, 0, 0.1) 0px 40px 100px 0px, rgba(0, 0, 0, 0.2) 0px 20px 60px 0px",
+              "rgba(0, 0, 0, 0.1) 0px 20px 10px 0px, rgba(0, 0, 0, 0.1) 0px 20px 6px 0px",
           }}
         />
 

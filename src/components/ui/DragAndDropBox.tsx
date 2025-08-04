@@ -42,7 +42,7 @@ const DragAndDropBox = () => {
 
   return (
     <motion.div
-      className="relative w-[712px] h-[432px] cursor-pointer"
+      className="relative w-full h-full cursor-pointer"
       onClick={handleClick}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -64,8 +64,8 @@ const DragAndDropBox = () => {
           <motion.rect
             x="1"
             y="1"
-            width="710"
-            height="430"
+            width="300"
+            height="200"
             rx="62" // Rounded corners
             fill="none"
             stroke={isDragging ? "#ff1515" : isHovered ? "#f3f4f6" : "#e5e7eb"}
@@ -132,7 +132,7 @@ const DragAndDropBox = () => {
 
         {/* Upload icon */}
         <motion.div
-          className="absolute"
+          className="absolute mb-8"
           animate={{
             y: isDragging ? -20 : isHovered ? -10 : 0,
             scale: isDragging ? 1.2 : isHovered ? 1.1 : 1,

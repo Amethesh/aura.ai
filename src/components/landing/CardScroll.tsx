@@ -12,7 +12,6 @@ interface CardScrollProps {
 }
 
 const CardScroll = ({cardData}:CardScrollProps): ReactElement => {
-  // 1. Set up Embla Carousel with the loop option
   const [isCursorVisible, setIsCursorVisible] = useState(false);
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -38,8 +37,7 @@ const CardScroll = ({cardData}:CardScrollProps): ReactElement => {
 
     let lastPosition = emblaApi.scrollProgress();
     let lastTimestamp = Date.now();
-    // 1. Use a ref to track interaction state without causing re-renders
-
+    
     const updateVelocity = () => {
       const currentPosition = emblaApi.scrollProgress();
       const currentTimestamp = Date.now();
@@ -55,9 +53,7 @@ const CardScroll = ({cardData}:CardScrollProps): ReactElement => {
       lastTimestamp = currentTimestamp;
     };
 
-    // The decay function remains the same, but we will control WHEN it's called
     const decayVelocity = () => {
-      // 2. Add a guard clause: only decay if the user is not actively dragging
       if (isDragging.current) return;
 
       scrollVelocity.set(scrollVelocity.get() * 0.95);
@@ -68,21 +64,17 @@ const CardScroll = ({cardData}:CardScrollProps): ReactElement => {
       }
     };
 
-    // 3. Set up event listeners to manage the interaction state
     const onPointerDown = () => {
       isDragging.current = true;
-      // Stop any existing decay animation
       scrollVelocity.stop();
     };
 
     const onPointerUp = () => {
       isDragging.current = false;
-      // Start the decay animation when the user lets go
       requestAnimationFrame(decayVelocity);
     };
 
     const onSettle = () => {
-      // Ensure velocity is fully decayed when the carousel settles
       scrollVelocity.set(0);
     };
 

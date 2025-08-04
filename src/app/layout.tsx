@@ -53,9 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.className}  antialiased`}
-      >
+      <body className={`${geistSans.className} antialiased`}>
         <TanStackProvider>
           <ThemeProvider
             attribute="class"

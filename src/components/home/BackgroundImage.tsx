@@ -8,6 +8,7 @@ interface BackgroundImageProps {
   width: number;
   height: number;
   roatation?: number;
+  className?: string;
 }
 
 const BackgroundImage = ({
@@ -15,6 +16,7 @@ const BackgroundImage = ({
   width,
   height,
   roatation = 0,
+  className = "",
 }: BackgroundImageProps) => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -43,7 +45,7 @@ const BackgroundImage = ({
 
   return (
     <motion.div
-      className="absolute top-0 z-0 ml-0"
+      className={`absolute top-0 z-0 ml-0 ${className}`}
       style={{
         x: backgroundX,
         y: backgroundY,
