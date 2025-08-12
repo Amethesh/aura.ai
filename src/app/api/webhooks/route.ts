@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { Prediction, validateWebhook } from "replicate";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createClient} from "@supabase/supabase-js";
 
 // Best practice: Create a dedicated admin client module
 // e.g., in /src/lib/supabase/admin.ts

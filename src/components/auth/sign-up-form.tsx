@@ -3,7 +3,6 @@
 import { cn } from "@/src/lib/utils";
 import { createClient } from "@/src/lib/supabase/client";
 import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

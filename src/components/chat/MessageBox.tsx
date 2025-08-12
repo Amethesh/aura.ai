@@ -30,7 +30,6 @@ export default function MessageBox({ message }: MessageBoxProps) {
     parameters,
     error_message,
     userPrompt,
-    credit_cost,
   } = message;
   const numOfOutputs = parameters?.num_of_output || 1;
   const ratio = parameters?.aspect_ratio;

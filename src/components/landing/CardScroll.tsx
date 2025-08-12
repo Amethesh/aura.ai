@@ -1,17 +1,19 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useVelocity } from "motion/react";
+import {  useMotionValue } from "motion/react";
 import { useRef, useEffect, useState, ReactElement } from "react";
 import { ImageCard3D } from "./3dImageCard"; // Adjust path if necessary
 import useEmblaCarousel from "embla-carousel-react";
 import { CustomCursor } from "./CustomCursor";
 import { ImageCard3DType } from "@/src/types/BaseType";
+import { cn } from "@/src/lib/utils";
 
 interface CardScrollProps {
-  cardData: ImageCard3DType[]
+  cardData: ImageCard3DType[];
+  scrollHeight?: string;
 }
 
-const CardScroll = ({cardData}:CardScrollProps): ReactElement => {
+const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): ReactElement => {
   const [isCursorVisible, setIsCursorVisible] = useState(false);
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -22,7 +24,7 @@ const CardScroll = ({cardData}:CardScrollProps): ReactElement => {
   });
 
   const scrollVelocity = useMotionValue(0);
-  
+
   const isDragging = useRef(false);
 
   const handleMouseEnter = () => {
@@ -37,7 +39,7 @@ const CardScroll = ({cardData}:CardScrollProps): ReactElement => {
 
     let lastPosition = emblaApi.scrollProgress();
     let lastTimestamp = Date.now();
-    
+
     const updateVelocity = () => {
       const currentPosition = emblaApi.scrollProgress();
       const currentTimestamp = Date.now();
@@ -94,7 +96,7 @@ const CardScroll = ({cardData}:CardScrollProps): ReactElement => {
 
   return (
     <div
-      className="relative w-screen h-[800px] overflow-hidden cursor-none"
+      className={cn("relative w-screen overflow-hidden cursor-none",scrollHeight )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

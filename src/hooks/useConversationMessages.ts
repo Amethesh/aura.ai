@@ -1,6 +1,6 @@
+"use client"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/src/lib/supabase/client";
-import { MessageType } from "@/src/types/BaseType";
 import { useEffect } from "react";
 
 export function useConversationMessages(conversationId: string) {
@@ -34,7 +34,7 @@ export function useConversationMessages(conversationId: string) {
           table: "jobs",
           filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
+        () => {
           if (mounted) {
             console.log("Real-time update received, invalidating query:", queryKey);
             queryClient.invalidateQueries({ queryKey });

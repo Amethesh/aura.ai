@@ -7,7 +7,7 @@ import { Loader2, Sparkles, XCircle } from "lucide-react";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import DialogBox from "./DialogBox";
 import { AnimatePresence, motion } from "motion/react";
-import { InputBoxParameter, ModelData } from "@/src/types/BaseType";
+import { ModelData } from "@/src/types/BaseType";
 import DynamicParameters from "./DynamicParameters";
 
 const initialModel: ModelData = {
@@ -191,7 +191,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const handleGenerateClick = () => {
     if (mutation.isPending) return;
 
-    const { isValid, error, sanitized } = validateAndSanitizePrompt(
+    const { isValid, error } = validateAndSanitizePrompt(
       parameters.prompt || ""
     );
     if (!isValid && error) {

@@ -1,7 +1,6 @@
 import { createClient } from "@/src/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import Replicate, { Prediction } from "replicate";
+import Replicate from "replicate";
 
 // It's a good practice to validate environment variables at startup
 if (!process.env.REPLICATE_API_TOKEN) {
@@ -12,19 +11,11 @@ if (!process.env.NGROK_HOST) {
     throw new Error("NGROK_HOST is not set. The webhook URL for Replicate will not work.");
 }
 
-
-const promptFormSchema = z.object({
-  parameters: z.object(),
-  conversationId: z.string().optional(),
-  model: z.string().optional()
-});
-
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
 const WEBHOOK_HOST = process.env.NGROK_HOST;
-const CREDIT_COST_PER_IMAGE = 1;
 
 export async function POST(req: Request) {
   try {

@@ -67,7 +67,7 @@ export default function UserImageGalleryClient({
   if (!images || images.length === 0) {
     return (
       <div className="p-2 mt-16 text-center text-neutral-400">
-        <p>You haven't generated any images yet.</p>
+        <p>You haven t generated any images yet.</p>
       </div>
     );
   }

@@ -1,6 +1,5 @@
 import GlassPaneBG from "./GlassPaneBG";
 import * as motion from "motion/react-client";
-import { ImageCard3D } from "./3dImageCard";
 import BackgroundImage from "../home/BackgroundImage";
 import { Variants } from "motion/react";
 

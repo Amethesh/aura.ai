@@ -2,13 +2,21 @@
 import React, { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 
+interface AnimatedCounterProps {
+  label?: string;
+  initialValue?: number;
+  min?: number;
+  max?: number;
+  onChange?: (value: number) => void;
+}
+
 const AnimatedCounter = ({
   label = "Batch",
   initialValue = 2,
   min = 0,
   max = 99,
-  onChange = (_: number) => {},
-}) => {
+  onChange = () => {},
+}: AnimatedCounterProps) => {
   const [count, setCount] = useState<number>(initialValue);
   const [isAnimating, setIsAnimating] = useState(false);
 

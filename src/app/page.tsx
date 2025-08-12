@@ -5,6 +5,7 @@ import Hero from "../components/landing/Hero";
 import { NavbarLander } from "../components/landing/Navbar";
 import PrivacySection from "../components/landing/PrivacySection";
 import Takecontrol from "../components/landing/Takecontrol";
+import UpscaleSection from "../components/landing/UpscaleSection";
 
 const page = () => {
   return (
@@ -12,11 +13,12 @@ const page = () => {
       <div className="relative overflow-hidden">
         <NavbarLander />
         <Hero />
-        <PrivacySection/>
+        <PrivacySection />
         <EditSection />
         <EditBranding />
         <EditShowcase />
         <Takecontrol />
+        <UpscaleSection />
       </div>
     </main>
   );

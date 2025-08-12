@@ -25,7 +25,6 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
-  const [isModalImageLoading, setIsModalImageLoading] = useState(true);
 
   const [isZoomed, setIsZoomed] = useState(false);
   const [backgroundPosition, setBackgroundPosition] = useState("50% 50%");
@@ -65,7 +64,7 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
   };
 
   const handleModalImageLoad = () => {
-    setIsModalImageLoading(false);
+    setIsImageLoading(false);
   };
 
   const handleModalBackdropClick = (e: React.MouseEvent) => {
@@ -264,7 +263,7 @@ const ImageCard = ({ imageUrl, prompt, width, height }: ImageCardProps) => {
                       height={height}
                       className="loupe-image w-full h-full max-h-[80vh] object-contain"
                       onLoad={handleModalImageLoad}
-                      onError={() => setIsModalImageLoading(false)}
+                      onError={() => setIsImageLoading(false)}
                     />
                   </figure>
                   <div className="absolute inset-0 rounded-[24px] border-2 border-white/30 pointer-events-none z-10"></div>

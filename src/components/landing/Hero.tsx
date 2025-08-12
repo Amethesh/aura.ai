@@ -99,55 +99,55 @@ const red = {
   highlight2: "#FF6600",
 };
 
-const blue = {
-  primary: "#4460C5",
-  secondary: "#6F74AC",
-  accent1: "#D5FDB9",
-  accent2: "#E4F9FF",
-  accent3: "#5367CE",
-  highlight1: "#5B82E1",
-  highlight2: "#5165CC",
-};
+// const blue = {
+//   primary: "#4460C5",
+//   secondary: "#6F74AC",
+//   accent1: "#D5FDB9",
+//   accent2: "#E4F9FF",
+//   accent3: "#5367CE",
+//   highlight1: "#5B82E1",
+//   highlight2: "#5165CC",
+// };
 
-const black = {
-  primary: "#222222",
-  secondary: "#555555",
-  accent1: "#999999",
-  accent2: "#DDDDDD",
-  accent3: "#FFFFFF",
-  highlight1: "#000000",
-  highlight2: "#888888",
-};
+// const black = {
+//   primary: "#222222",
+//   secondary: "#555555",
+//   accent1: "#999999",
+//   accent2: "#DDDDDD",
+//   accent3: "#FFFFFF",
+//   highlight1: "#000000",
+//   highlight2: "#888888",
+// };
 
-const purple = {
-  primary: "#7D5FFF",
-  secondary: "#A29BFE",
-  accent1: "#DCD0FF",
-  accent2: "#F3EFFF",
-  accent3: "#E57EFF",
-  highlight1: "#B300FF",
-  highlight2: "#FF00AA",
-};
+// const purple = {
+//   primary: "#7D5FFF",
+//   secondary: "#A29BFE",
+//   accent1: "#DCD0FF",
+//   accent2: "#F3EFFF",
+//   accent3: "#E57EFF",
+//   highlight1: "#B300FF",
+//   highlight2: "#FF00AA",
+// };
 
-const green = {
-  primary: "#4ADE80",
-  secondary: "#34D399",
-  accent1: "#D9F99D",
-  accent2: "#ECFDF5",
-  accent3: "#86EFAC",
-  highlight1: "#15803D",
-  highlight2: "#65A30D",
-};
+// const green = {
+//   primary: "#4ADE80",
+//   secondary: "#34D399",
+//   accent1: "#D9F99D",
+//   accent2: "#ECFDF5",
+//   accent3: "#86EFAC",
+//   highlight1: "#15803D",
+//   highlight2: "#65A30D",
+// };
 
-const gold = {
-  primary: "#FFD700",
-  secondary: "#FFE066",
-  accent1: "#FFF8DC",
-  accent2: "#FFF5E1",
-  accent3: "#FFECB3",
-  highlight1: "#FFA500",
-  highlight2: "#FFB300",
-};
+// const gold = {
+//   primary: "#FFD700",
+//   secondary: "#FFE066",
+//   accent1: "#FFF8DC",
+//   accent2: "#FFF5E1",
+//   accent3: "#FFECB3",
+//   highlight1: "#FFA500",
+//   highlight2: "#FFB300",
+// };
 
 const Hero = () => {
   return (

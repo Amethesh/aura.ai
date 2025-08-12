@@ -291,3 +291,18 @@
   min-width: 0;
   position: relative;
 }
+
+/* In your global CSS file, e.g., globals.css or app/globals.css */
+
+@keyframes move-manga-lines {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 500px; /* Moves diagonally by one tile size */
+  }
+}
+
+.animate-manga-lines {
+  animation: move-manga-lines 10s linear infinite; /* Adjust duration as needed */
+}

@@ -41,8 +41,6 @@ const GlassPaneBG: React.FC<GlassModalProps> = ({
   ].join(" ");
 
   const glassPanes = Array.from({ length: paneCount }, (_, index) => {
-    const isFirst = index === 0;
-    const isLast = index === paneCount - 1;
     return (
       <li
         key={index}

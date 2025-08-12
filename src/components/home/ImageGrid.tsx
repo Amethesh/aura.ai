@@ -23,7 +23,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
       className="my-masonry-grid"
       columnClassName="my-masonry-grid_column"
     >
-      {images.map((image, index) => (
+      {images.map((image) => (
         <ImageCard
           key={image.id}
           imageUrl={image.image_url}
