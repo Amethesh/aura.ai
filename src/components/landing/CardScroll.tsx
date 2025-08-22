@@ -1,6 +1,6 @@
 "use client";
 
-import {  useMotionValue } from "motion/react";
+import { useMotionValue } from "motion/react";
 import { useRef, useEffect, useState, ReactElement } from "react";
 import { ImageCard3D } from "./3dImageCard"; // Adjust path if necessary
 import useEmblaCarousel from "embla-carousel-react";
@@ -15,6 +15,7 @@ interface CardScrollProps {
 
 const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): ReactElement => {
   const [isCursorVisible, setIsCursorVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: "center",
@@ -35,14 +36,18 @@ const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): 
     setIsCursorVisible(false);
   };
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!emblaApi) return;
 
     let lastPosition = emblaApi.scrollProgress();
-    let lastTimestamp = Date.now();
+    let lastTimestamp = performance.now();
 
     const updateVelocity = () => {
       const currentPosition = emblaApi.scrollProgress();
-      const currentTimestamp = Date.now();
+      const currentTimestamp = performance.now();
       const timeDelta = currentTimestamp - lastTimestamp;
 
       if (timeDelta > 0) {
@@ -96,11 +101,11 @@ const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): 
 
   return (
     <div
-      className={cn("relative w-screen overflow-hidden cursor-none",scrollHeight )}
+      className={cn("relative w-screen mometum-scroll smooth-scroll-x overflow-x-auto cursor-none", scrollHeight)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <CustomCursor isVisible={isCursorVisible} />
+      {mounted && <CustomCursor isVisible={isCursorVisible} />}
 
       <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-black/30 to-transparent z-10 pointer-events-none" />
       <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-black/30 to-transparent z-10 pointer-events-none" />
@@ -110,7 +115,7 @@ const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): 
             <div
               key={`${card.cardText}-${index}`}
               className="embla__slide px-20"
-              // px-12 on each side = 96px gap * 2 = 192px total
+            // px-12 on each side = 96px gap * 2 = 192px total
             >
               <ImageCard3D
                 width={card?.width}

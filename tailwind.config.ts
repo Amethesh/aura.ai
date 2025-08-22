@@ -10,6 +10,19 @@ export default {
   ],
   theme: {
     extend: {
+      scrollBehavior: {
+        smooth: 'smooth',
+        auto: 'auto',
+      },
+      animation: {
+        'smooth-bounce': 'smooth-bounce 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+      },
+      keyframes: {
+        'smooth-bounce': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-4px)' },
+        },
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

@@ -30,6 +30,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 80 16% 4%;
     --foreground: 0 0% 98%;
@@ -62,15 +63,31 @@
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
+  }
+
   body {
     @apply bg-background text-foreground;
+    /* Enhanced smooth scrolling with momentum */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: smooth;
+  }
+
+  /* Smooth scrolling for all scrollable elements */
+  * {
+    scroll-behavior: smooth;
   }
 }
+
 @layer components {
   .hide-scrollbar {
     scrollbar-width: 0px;
     scrollbar-color: transparent;
   }
+
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -84,27 +101,25 @@
 
   /* Horizontal Scroll Animation */
   .animate-scroll-x {
-    animation: scroll-x var(--animation-duration) linear infinite
-      var(--animation-direction);
+    animation: scroll-x var(--animation-duration) linear infinite var(--animation-direction);
   }
+
   @keyframes scroll-x {
     to {
-      transform: translateX(
-        calc(-50% - 1.5rem)
-      ); /* 1.5rem is half the gap-12 */
+      transform: translateX(calc(-50% - 1.5rem));
+      /* 1.5rem is half the gap-12 */
     }
   }
 
   /* Vertical Scroll Animation */
   .animate-scroll-y {
-    animation: scroll-y var(--animation-duration) linear infinite
-      var(--animation-direction);
+    animation: scroll-y var(--animation-duration) linear infinite var(--animation-direction);
   }
+
   @keyframes scroll-y {
     to {
-      transform: translateY(
-        calc(-50% - 1.5rem)
-      ); /* 1.5rem is half the gap-12 */
+      transform: translateY(calc(-50% - 1.5rem));
+      /* 1.5rem is half the gap-12 */
     }
   }
 }
@@ -128,24 +143,28 @@
 /* This is the main container for the masonry grid */
 .my-masonry-grid {
   display: flex;
-  margin-left: 0px; /* gutter size offset */
+  margin-left: 0px;
+  /* gutter size offset */
   width: auto;
 }
 
 /* This is for each column in the grid */
 .my-masonry-grid_column {
-  padding-left: 10px; /* gutter size */
+  padding-left: 10px;
+  /* gutter size */
   background-clip: padding-box;
 }
 
 /* This is for each item within a column */
-.my-masonry-grid_column > div {
-  margin-bottom: 10px; /* space between items */
+.my-masonry-grid_column>div {
+  margin-bottom: 10px;
+  /* space between items */
 }
 
 .custom-box {
   position: relative;
-  padding: 0.25rem; /* Tailwind p-1 */
+  padding: 0.25rem;
+  /* Tailwind p-1 */
   background-color: #131312;
   border: 1px solid #313131;
   border-radius: 8px;
@@ -156,6 +175,7 @@
   from {
     background-position: 50% 50%, 50% 50%;
   }
+
   to {
     background-position: 350% 50%, 350% 50%;
   }
@@ -165,17 +185,20 @@
   0% {
     left: -100%;
   }
+
   100% {
     left: 100%;
   }
 }
 
 @keyframes pulse-dot {
+
   0%,
   100% {
     opacity: 0.6;
     transform: scale(1);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.2);
@@ -198,6 +221,7 @@
   0% {
     background-position: -200% center;
   }
+
   100% {
     background-position: 200% center;
   }
@@ -212,7 +236,8 @@
   position: relative;
   overflow: hidden;
   border-radius: 28px;
-  background-size: 200%; /* Adjust zoom level here */
+  background-size: 200%;
+  /* Adjust zoom level here */
   background-repeat: no-repeat;
   /* cursor: zoom-in; */
   cursor: url(/cursors/zoom-in.svg) 16 16, auto;
@@ -242,17 +267,22 @@
 
 /* Hide scrollbar while maintaining scroll functionality */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
+  /* Safari and Chrome */
 }
 
-/* Smooth scrolling behavior */
+/* Enhanced smooth scrolling behavior */
 .scrollbar-hide {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: smooth;
 }
 
 /* Optional: Add custom scrollbar if you want it visible */
@@ -278,6 +308,7 @@
 .embla {
   overflow: hidden;
 }
+
 .embla__container {
   display: flex;
   /* The following are optional but recommended */
@@ -286,8 +317,10 @@
   -khtml-user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
+
 .embla__slide {
-  flex: 0 0 auto; /* This is crucial */
+  flex: 0 0 auto;
+  /* This is crucial */
   min-width: 0;
   position: relative;
 }
@@ -298,11 +331,49 @@
   0% {
     background-position: 0 0;
   }
+
   100% {
-    background-position: 0 500px; /* Moves diagonally by one tile size */
+    background-position: 0 500px;
+    /* Moves diagonally by one tile size */
   }
 }
 
 .animate-manga-lines {
-  animation: move-manga-lines 10s linear infinite; /* Adjust duration as needed */
+  animation: move-manga-lines 10s linear infinite;
+  /* Adjust duration as needed */
+}
+
+/* Enhanced smooth scrolling utilities */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: smooth;
+}
+
+.smooth-scroll-x {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: smooth;
+  overscroll-behavior-y: auto;
+}
+
+.smooth-scroll-y {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: auto;
+  overscroll-behavior-y: smooth;
+}
+
+/* Momentum scrolling for better mobile experience */
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+/* Smooth transitions for scroll-triggered animations */
+.scroll-smooth-transition {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }

@@ -92,6 +92,9 @@ importers:
       react-masonry-css:
         specifier: ^1.0.16
         version: 1.0.16(react@19.1.0)
+      react-progressive-blur:
+        specifier: ^1.0.5
+        version: 1.0.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-zoom-pan-pinch:
         specifier: ^3.7.0
         version: 3.7.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2499,6 +2502,12 @@ packages:
     resolution: {integrity: sha512-KSW0hR2VQmltt/qAa3eXOctQDyOu7+ZBevtKgpNDSzT7k5LA/0XntNa9z9HKCdz3QlxmJHglTZ18e4sX4V8zZQ==}
     peerDependencies:
       react: '>=16.0.0'
+
+  react-progressive-blur@1.0.5:
+    resolution: {integrity: sha512-8piH02pgiP11TUMfPRUEVG+oawShFjZvn3rgZYsxK0r5eT0iNuSWkiUqd0yae/c1Nm6FXhWELlXqpUc+Zkvaug==}
+    peerDependencies:
+      react: '>=17.0.0'
+      react-dom: '>=17.0.0'
 
   react-reconciler@0.31.0:
     resolution: {integrity: sha512-7Ob7Z+URmesIsIVRjnLoDGwBEG/tVitidU0nMsqX/eeJaLY89RISO/10ERe0MqmzuKUUB1rmY+h1itMbUHg9BQ==}
@@ -5528,6 +5537,11 @@ snapshots:
   react-masonry-css@1.0.16(react@19.1.0):
     dependencies:
       react: 19.1.0
+
+  react-progressive-blur@1.0.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   react-reconciler@0.31.0(react@19.1.0):
     dependencies:

@@ -22,8 +22,10 @@ export const InfiniteImageScroll = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [start, setStart] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     addAnimation();
   }, []);
 
@@ -91,11 +93,16 @@ export const InfiniteImageScroll = ({
           "flex min-w-full shrink-0 gap-12 py-4 w-max flex-nowrap",
           // Apply animation and layout based on orientation
           {
-            "animate-scroll-x flex-row": orientation === "horizontal",
-            "animate-scroll-y flex-col": orientation === "vertical",
+            "flex-row": orientation === "horizontal",
+            "flex-col": orientation === "vertical",
+          },
+          // Apply animation only when mounted and started
+          mounted && start && {
+            "animate-scroll-x": orientation === "horizontal",
+            "animate-scroll-y": orientation === "vertical",
           },
           // Conditionally apply start and pause-on-hover classes
-          !start && "opacity-0", // Hide until JS is ready to avoid flash
+          !mounted && "opacity-0", // Hide until component is mounted to avoid hydration mismatch
           pauseOnHover && "hover:[animation-play-state:paused]"
         )}
       >

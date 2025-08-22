@@ -14,10 +14,12 @@ const GlassPaneBG: React.FC<GlassModalProps> = ({
   className = "",
 }) => {
   const [paneCount, setPaneCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // This effect calculates the number of panes based on the container width.
   useEffect(() => {
+    setMounted(true);
     const calculatePanes = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
@@ -40,7 +42,7 @@ const GlassPaneBG: React.FC<GlassModalProps> = ({
     "backdrop-blur-[20px]",
   ].join(" ");
 
-  const glassPanes = Array.from({ length: paneCount }, (_, index) => {
+  const glassPanes = mounted ? Array.from({ length: paneCount }, (_, index) => {
     return (
       <li
         key={index}
@@ -50,7 +52,7 @@ const GlassPaneBG: React.FC<GlassModalProps> = ({
         style={{ width: `${paneWidth}px` }}
       ></li>
     );
-  });
+  }) : [];
 
   return (
     // 1. The main container is `relative` and its height is determined

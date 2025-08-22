@@ -14,10 +14,16 @@ const blurOptions = [
 ];
 const rotate90 = "rotate-90";
 
-const getRandomStyle = () => {
-  const gradient = Math.random() > 0.5 ? gradientTransparent : gradientOpaque;
-  const blur = blurOptions[Math.floor(Math.random() * blurOptions.length)];
-  const rotate = Math.random() < 0.05 ? rotate90 : "";
+// Seeded random function for consistent server/client rendering
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+
+const getRandomStyle = (seed: number) => {
+  const gradient = seededRandom(seed) > 0.5 ? gradientTransparent : gradientOpaque;
+  const blur = blurOptions[Math.floor(seededRandom(seed + 1) * blurOptions.length)];
+  const rotate = seededRandom(seed + 2) < 0.05 ? rotate90 : "";
   return clsx(baseStyles, gradient, blur, rotate);
 };
 
@@ -54,7 +60,7 @@ const PixelCensor: React.FC<PixelCensorProps> = ({
               key={`${rowIndex}-${colIndex}`}
               className={clsx(
                 "absolute",
-                isVisible ? getRandomStyle() : "opacity-0"
+                isVisible ? getRandomStyle(rowIndex * cols + colIndex) : "opacity-0"
               )}
               style={{
                 width: squareSize,
