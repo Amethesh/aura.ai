@@ -17,7 +17,7 @@ const matrix = [
 const PrivacySection = () => {
   return (
     <section className="mt-12">
-      <MouseParallaxProvider className="relative w-screen py-32 px-4 overflow-hidden">
+      <MouseParallaxProvider className="relative w-screen py-16 sm:py-24 lg:py-32 px-2 sm:px-4 overflow-hidden">
         <div
           className="absolute inset-0 z-10 overflow-hidden pointer-events-none opacity-60"
           style={{
@@ -43,16 +43,16 @@ const PrivacySection = () => {
         </MouseParallaxItem>
 
         {/* Static text elements */}
-        <p className="text-[50px] absolute top-44 left-0 ml-8 font-bold text-accent/80 z-1 [text-shadow:_2px_2px_4px_rgba(0,0,0,0.3)]">
+        <p className="font-gothic text-[20px] sm:text-[30px] lg:text-[70px] absolute top-20 sm:top-32 lg:top-44 left-0 ml-2 sm:ml-4 lg:ml-8 font-bold text-accent/80 z-1 [text-shadow:_2px_2px_4px_rgba(0,0,0,0.3)]">
           PRIVATE BY DESIGN.
         </p>
-        <p className="text-[50px] absolute top-44 right-0 mr-8 font-bold text-accent/80 z-20 [text-shadow:_2px_2px_4px_rgba(0,0,0,0.3)]">
+        <p className="font-gothic text-[20px] sm:text-[30px] lg:text-[70px] absolute top-32 sm:top-44 lg:top-44 right-0 mr-2 sm:mr-4 lg:mr-8 font-bold text-accent/80 z-20 [text-shadow:_2px_2px_4px_rgba(0,0,0,0.3)]">
           ENCRYPTED BY DEFAULT.
         </p>
-        <p className="text-[100px] absolute top-1/3 left-0 ml-8 font-bold text-black/50 z-20">
+        <p className="font-gothic text-[40px] sm:text-[60px] lg:text-[140px] absolute top-44 sm:top-56 lg:top-1/3 left-0 ml-2 sm:ml-4 lg:ml-8 font-bold text-black/60 z-20">
           PRIVACY
         </p>
-        <p className="text-[100px] absolute top-1/3 right-0 mr-8 font-bold text-black/50 z-20">
+        <p className="font-gothic text-[40px] sm:text-[60px] lg:text-[140px] absolute top-56 sm:top-72 lg:top-1/3 right-0 mr-2 sm:mr-4 lg:mr-8 font-bold text-black/60 z-20">
           MATTERS
         </p>
 
@@ -74,14 +74,18 @@ const PrivacySection = () => {
 
         {/* Other static elements */}
         <div className="z-30 absolute inset-x-0 bottom-0 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm text-white" />
-        <p className="z-40 text-[35px] text-center absolute inset-x-0 bottom-32 px-56">
+        <p className="z-40 text-[16px] sm:text-[24px] lg:text-[35px] text-center absolute inset-x-0 bottom-16 sm:bottom-24 lg:bottom-32 px-4 sm:px-16 lg:px-56">
           We respect your <span className="text-accent">privacy</span>— no
           prompts, images, or metadata are safe and encrypted. Everything is
           processed in real-time with full encryption.
         </p>
 
         <div className="absolute top-0 w-full h-full z-20 flex justify-center items-center">
-          <PixelCensor matrix={matrix} squareSize={50} className="mb-52" />
+          <PixelCensor
+            matrix={matrix}
+            squareSize={50}
+            className="mb-20 sm:mb-32 lg:mb-52"
+          />
         </div>
       </MouseParallaxProvider>
     </section>

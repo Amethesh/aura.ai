@@ -3,7 +3,7 @@ import { IconTerminal } from "@tabler/icons-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
-import { Loader2, Sparkles, XCircle } from "lucide-react";
+import { Loader2, MoreVertical, Sparkles, XCircle } from "lucide-react";
 import { useGenerateImage } from "@/src/hooks/useGenerateImage";
 import DialogBox from "./DialogBox";
 import { AnimatePresence, motion } from "motion/react";
@@ -173,6 +173,7 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   const [selectedModel, setSelectedModel] = useState<ModelData>(initialModel);
   const [parameters, setParameters] = useState<Record<string, any>>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [isParamsMenuOpen, setIsParamsMenuOpen] = useState(false);
 
   const mutation = useGenerateImage(conversationId);
 
@@ -231,100 +232,159 @@ const InputBox = ({ conversationId }: InputBoxProps) => {
   };
 
   return (
-    <section className="w-fit bg-[rgba(17,17,17,0.8)] border border-white/10 backdrop-blur-[5px] rounded-3xl px-2 py-4 mb-2">
-      <AnimatePresence>
-        {isDialogOpen && (
-          <motion.div
-            className="w-full mb-2 overflow-hidden"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "22rem" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-          >
-            <div className="w-full h-full p-2 overflow-y-auto">
-              <DialogBox onSelectModel={handleModelSelect} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {formError && (
-        <div className="flex items-center gap-2 text-red-400 bg-red-900/50 p-2 rounded-md mb-2 text-sm">
-          <XCircle size={16} />
-          <p>{formError}</p>
-        </div>
-      )}
-      <AnimatePresence>
-        {!isDialogOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="relative"
-          >
-            <IconTerminal className="absolute top-4 left-4 text-neutral-500" />
-            <Textarea
-              value={parameters.prompt || ""}
-              onChange={(e) =>
-                setParameters((prev) => ({
-                  ...prev,
-                  prompt: e.target.value,
-                }))
-              }
-              className="pl-12 hide-scrollbar"
-              placeholder="A cute magical flying cat, cinematic, 4k"
-              maxHeight={100}
-              disabled={mutation.isPending}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleGenerateClick();
-                }
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <div className="mt-2 flex gap-2">
-        <div
-          onClick={handleCardClick}
-          className="w-[100px] h-[75px] rounded-2xl border border-[#282828] shadow-[0_4px_4px] shadow-black/30 relative cursor-pointer transition-transform hover:scale-105 active:scale-100 overflow-hidden"
-        >
-          <div className="absolute w-full h-full bg-black/60 rounded-2xl flex justify-center items-center p-1 text-center">
-            <p className="text-white text-xs font-semibold leading-tight">
-              {selectedModel.model_name}
-            </p>
-          </div>
-          <Image
-            className="object-cover w-full h-full rounded-2xl object-center"
-            src={selectedModel.cover_image}
-            alt={selectedModel.model_name}
-            width={100}
-            height={75}
-          />
-        </div>
-
-        <DynamicParameters
-          inputParameters={selectedModel.parameters}
-          outputParameters={parameters}
-          onValuesChange={handleParametersChange}
-        />
-
-        <button
-          onClick={handleGenerateClick}
-          disabled={mutation.isPending}
-          className="px-6 rounded-2xl text-xl bg-accent/90 text-black font-black border-2 border-black flex items-center gap-2 backdrop-blur-md disabled:bg-gray-500 disabled:cursor-not-allowed"
-        >
-          {mutation.isPending ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <Sparkles />
+    <>
+      <section className="w-fit bg-[rgba(17,17,17,0.8)] border border-white/10 backdrop-blur-[5px] rounded-3xl p-2 md:p-4 mb-2">
+        <AnimatePresence>
+          {isDialogOpen && (
+            <motion.div
+              className="w-full mb-2 overflow-hidden"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "22rem" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            >
+              <div className="w-full h-full p-2 overflow-y-auto">
+                <DialogBox onSelectModel={handleModelSelect} />
+              </div>
+            </motion.div>
           )}
-          {mutation.isPending ? "Generating..." : "Generate"}
-        </button>
-      </div>
-    </section>
+        </AnimatePresence>
+
+        {formError && (
+          <div className="flex items-center gap-2 text-red-400 bg-red-900/50 p-2 rounded-md mb-2 text-sm">
+            <XCircle size={16} />
+            <p>{formError}</p>
+          </div>
+        )}
+        <AnimatePresence>
+          {!isDialogOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.1 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="relative"
+            >
+              <IconTerminal className="absolute top-4 left-4 text-neutral-500" />
+              <Textarea
+                value={parameters.prompt || ""}
+                onChange={(e) =>
+                  setParameters((prev) => ({
+                    ...prev,
+                    prompt: e.target.value,
+                  }))
+                }
+                className="pl-12 hide-scrollbar"
+                placeholder="A cute magical flying cat, cinematic, 4k"
+                maxHeight={100}
+                disabled={mutation.isPending}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleGenerateClick();
+                  }
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="mt-2 flex items-center gap-2">
+          <div
+            onClick={handleCardClick}
+            className="w-[100px] h-[75px] rounded-2xl border border-[#282828] shadow-md relative cursor-pointer transition-transform hover:scale-105 active:scale-100 overflow-hidden flex-shrink-0"
+          >
+            <div className="absolute w-full h-full bg-black/60 flex justify-center items-center p-1 text-center">
+              <p className="text-white text-xs font-semibold leading-tight">
+                {selectedModel.model_name}
+              </p>
+            </div>
+            <Image
+              className="object-cover w-full h-full"
+              src={selectedModel.cover_image}
+              alt={selectedModel.model_name}
+              width={100}
+              height={75}
+            />
+          </div>
+
+          {/* DESKTOP: Show parameters inline */}
+          <div className="hidden md:flex flex-grow justify-center">
+            <DynamicParameters
+              inputParameters={selectedModel.parameters}
+              outputParameters={parameters}
+              onValuesChange={handleParametersChange}
+            />
+          </div>
+
+          <button
+            onClick={handleGenerateClick}
+            disabled={mutation.isPending}
+            className="h-[75px] px-6 rounded-2xl text-xl bg-accent/90 text-black font-black border-2 border-black flex items-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed flex-shrink-0"
+          >
+            {mutation.isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Sparkles />
+            )}
+            <span
+              className={mutation.isPending ? "hidden sm:inline" : "inline"}
+            >
+              {mutation.isPending ? "Generating..." : "Generate"}
+            </span>
+          </button>
+
+          {/* MOBILE: Show 3-dot menu button */}
+          <div className="flex-grow flex justify-end md:hidden">
+            <button
+              onClick={() => setIsParamsMenuOpen(true)}
+              className="h-[75px] w-[60px] rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center text-white/70 hover:bg-black/40"
+            >
+              <MoreVertical />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* MODAL FOR MOBILE PARAMETERS */}
+      <AnimatePresence>
+        {isParamsMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsParamsMenuOpen(false)}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-[#181818] rounded-2xl border border-white/10 p-6 shadow-2xl"
+            >
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Advanced Settings
+              </h3>
+              <div className="mb-6">
+                <DynamicParameters
+                  inputParameters={selectedModel.parameters}
+                  outputParameters={parameters}
+                  onValuesChange={handleParametersChange}
+                />
+              </div>
+              <button
+                onClick={() => setIsParamsMenuOpen(false)}
+                className="w-full py-2.5 rounded-lg bg-accent/90 text-black font-bold"
+              >
+                Done
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

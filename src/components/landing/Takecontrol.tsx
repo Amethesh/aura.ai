@@ -111,7 +111,7 @@ const cardData3: ImageCard3DType[] = [
 
 const Takecontrol = () => {
   return (
-    <section className="relative mt-12 mb-12">
+    <section className="relative mt-48 mb-20">
       <GlassPaneBG paneWidth={60}>
         <MouseParallaxProvider className="relative flex h-screen w-screen items-center justify-center py-16 px-4">
           <div

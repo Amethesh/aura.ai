@@ -91,6 +91,10 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  .font-gothic {
+    font-family: var(--font-gothic), sans-serif;
+  }
 }
 
 @layer utilities {

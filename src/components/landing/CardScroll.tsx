@@ -13,7 +13,10 @@ interface CardScrollProps {
   scrollHeight?: string;
 }
 
-const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): ReactElement => {
+const CardScroll = ({
+  cardData,
+  scrollHeight = "h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px]",
+}: CardScrollProps): ReactElement => {
   const [isCursorVisible, setIsCursorVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -22,6 +25,8 @@ const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): 
     containScroll: false,
     dragFree: true,
     watchDrag: true,
+    skipSnaps: false,
+    inViewThreshold: 0.7,
   });
 
   const scrollVelocity = useMotionValue(0);
@@ -29,7 +34,10 @@ const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): 
   const isDragging = useRef(false);
 
   const handleMouseEnter = () => {
-    setIsCursorVisible(true);
+    // Only show custom cursor on desktop
+    if (window.innerWidth >= 768) {
+      setIsCursorVisible(true);
+    }
   };
 
   const handleMouseLeave = () => {
@@ -101,21 +109,25 @@ const CardScroll = ({ cardData, scrollHeight = "h-[800px]" }: CardScrollProps): 
 
   return (
     <div
-      className={cn("relative w-screen mometum-scroll smooth-scroll-x overflow-x-auto cursor-none", scrollHeight)}
+      className={cn(
+        "relative w-screen mometum-scroll smooth-scroll-x overflow-x-auto md:cursor-none",
+        scrollHeight
+      )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {mounted && <CustomCursor isVisible={isCursorVisible} />}
 
-      <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-black/30 to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-black/30 to-transparent z-10 pointer-events-none" />
+      {/* Gradient overlays - responsive widths */}
+      <div className="absolute left-0 top-0 w-16 md:w-32 h-full bg-gradient-to-r from-black/30 to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 w-16 md:w-32 h-full bg-gradient-to-l from-black/30 to-transparent z-10 pointer-events-none" />
+
       <div className="embla w-full h-full" ref={emblaRef}>
         <div className="embla__container h-full items-center">
           {cardData.map((card, index) => (
             <div
               key={`${card.cardText}-${index}`}
-              className="embla__slide px-20"
-            // px-12 on each side = 96px gap * 2 = 192px total
+              className="embla__slide px-4 sm:px-8 md:px-12 lg:px-20"
             >
               <ImageCard3D
                 width={card?.width}

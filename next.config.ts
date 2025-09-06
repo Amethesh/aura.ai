@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "tjzk.replicate.delivery",
+      },
+      {
+        protocol: "https",
+        hostname: "upload.wikimedia.org",
       }
     ],
   },

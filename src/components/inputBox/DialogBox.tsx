@@ -29,7 +29,7 @@ const DialogBox = ({ onSelectModel }: DialogBoxProps) => {
       if (rpcError) {
         throw new Error(rpcError.message);
       }
-      console.log(data)
+      console.log(data);
       return data as unknown as ModelData[];
     },
     // staleTime: 5 * 60 * 1000, // 5 minutes
@@ -85,20 +85,21 @@ const DialogBox = ({ onSelectModel }: DialogBoxProps) => {
 
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-nowrap text-white text-lg font-semibold">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <p className="text-nowrap text-white text-lg font-semibold text-center sm:text-left">
           Change model/checkpoint
         </p>
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <Input
             placeholder="Search..."
-            className="rounded-2xl min-w-52 py-1.5 pr-8 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
+            // Make search bar full-width on mobile to be easily tappable
+            className="rounded-2xl w-full min-w-52 py-1.5 pr-8 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
             value={searchTerm}
             onChange={handleSearchChange}
           />
           <IconSearch
             size={16}
-            className="absolute top-1/2 right-2 -translate-y-1/2 text-white/60"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-white/60"
           />
         </div>
       </div>

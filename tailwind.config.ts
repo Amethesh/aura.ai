@@ -10,17 +10,28 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        gothic: ['var(--font-gothic)', 'sans-serif'],
+      },
       scrollBehavior: {
         smooth: 'smooth',
         auto: 'auto',
       },
       animation: {
         'smooth-bounce': 'smooth-bounce 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        scroll: "scroll 40s linear infinite",
       },
       keyframes: {
         'smooth-bounce': {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-4px)' },
+        },
+        scroll: {
+          "0%": { transform: "translateX(0)" },
+          // We translate by -50% because we have two sets of logos.
+          // This moves the entire first set out of view and the second
+          // set into the exact starting position of the first.
+          "100%": { transform: "translateX(-50%)" },
         },
       },
       colors: {

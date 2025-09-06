@@ -1,9 +1,13 @@
+"use client";
 import Image from "next/image";
 import { GradientComponent } from "./Gradient";
 import CardScroll from "./CardScroll";
 import GlassPaneBG from "./GlassPaneBG";
 import InputBox from "../inputBox/InputBox";
 import { ImageCard3DType } from "@/src/types/BaseType";
+import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect } from "react";
+import { heroSlides, HeroSlide } from "@/src/lib/heroConfig";
 
 const cardData1: ImageCard3DType[] = [
   {
@@ -89,104 +93,209 @@ const cardData2: ImageCard3DType[] = [
   },
 ];
 
-const red = {
-  primary: "#FF4E4E",
-  secondary: "#FF7373",
-  accent1: "#FFD6D6",
-  accent2: "#FFE5E5",
-  accent3: "#FFA8A8",
-  highlight1: "#FF0033",
-  highlight2: "#FF6600",
-};
-
-// const blue = {
-//   primary: "#4460C5",
-//   secondary: "#6F74AC",
-//   accent1: "#D5FDB9",
-//   accent2: "#E4F9FF",
-//   accent3: "#5367CE",
-//   highlight1: "#5B82E1",
-//   highlight2: "#5165CC",
-// };
-
-// const black = {
-//   primary: "#222222",
-//   secondary: "#555555",
-//   accent1: "#999999",
-//   accent2: "#DDDDDD",
-//   accent3: "#FFFFFF",
-//   highlight1: "#000000",
-//   highlight2: "#888888",
-// };
-
-// const purple = {
-//   primary: "#7D5FFF",
-//   secondary: "#A29BFE",
-//   accent1: "#DCD0FF",
-//   accent2: "#F3EFFF",
-//   accent3: "#E57EFF",
-//   highlight1: "#B300FF",
-//   highlight2: "#FF00AA",
-// };
-
-// const green = {
-//   primary: "#4ADE80",
-//   secondary: "#34D399",
-//   accent1: "#D9F99D",
-//   accent2: "#ECFDF5",
-//   accent3: "#86EFAC",
-//   highlight1: "#15803D",
-//   highlight2: "#65A30D",
-// };
-
-// const gold = {
-//   primary: "#FFD700",
-//   secondary: "#FFE066",
-//   accent1: "#FFF8DC",
-//   accent2: "#FFF5E1",
-//   accent3: "#FFECB3",
-//   highlight1: "#FFA500",
-//   highlight2: "#FFB300",
-// };
-
 const Hero = () => {
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState<HeroSlide>(heroSlides[0]);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (isPaused) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlideIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % heroSlides.length;
+        setCurrentSlide(heroSlides[nextIndex]);
+        return nextIndex;
+      });
+    }, 5000); // Change every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
   return (
-    <div className="relative w-full overflow-hidden">
-      <div>
-        <p className="text-[60px] font-bold z- absolute top-24 left-0 text- ml-12">
-          Generate and edit high
-        </p>
-        <p className="text-[60px] font-bold z-10 absolute top-24 right-0 text- ">
-          quality images in seconds!
-        </p>
-      </div>
-      <div className="relative -mt-10 h-[105vh]">
-        <Image
-          className="h-full w-full object-scale-down"
-          src={"/images/landing/hero3.png"}
-          width={800}
-          height={800}
-          alt="Cover of an high quality AI images"
-        />
-        <div className="z-10 absolute inset-x-0 bottom-0 h-[400px] bg-black/20 [mask-image:linear-gradient(to_top,white,transparent)] !backdrop-blur-sm" />
-        <div className="absolute inset-x-0 bottom-32 z-10 w-screen flex justify-center">
-          <InputBox />
+    <div
+      className="relative w-full overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Hero Section */}
+      <div className="group relative -mt-10 h-[90vh] sm:h-[105vh] min-h-[500px]">
+        {/* Animated Images */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide.id}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{
+              duration: 1.2,
+              ease: [0.25, 0.46, 0.45, 0.94], // Custom easing for smooth transition
+            }}
+            className="absolute inset-0"
+          >
+            <Image
+              className="absolute inset-0 h-full w-full object-contain"
+              src={currentSlide.image}
+              alt="Cover of an high quality AI images"
+              priority
+              objectFit="contain"
+              layout="fill"
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Gradient Overlay */}
+        <div className="z-10 absolute inset-x-0 bottom-0 h-[200px] sm:h-[400px] bg-black/5 [mask-image:linear-gradient(to_top,white,transparent)] backdrop-blur-md" />
+
+        {/* Hero Content */}
+        <div className="absolute inset-x-0 bottom-6 sm:bottom-16 z-10 w-full flex flex-col justify-center items-center px-2">
+          <AnimatePresence mode="wait">
+            <motion.h1
+              key={`title-${currentSlide.id}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{
+                duration: 0.8,
+                delay: 0.3,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
+              className="font-gothic text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-center mb-3 sm:mb-6 max-w-4xl leading-tight"
+            >
+              {currentSlide.title}
+            </motion.h1>
+          </AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            <InputBox />
+          </motion.div>
+        </div>
+
+        {/* Navigation Arrows */}
+        <motion.button
+          onClick={() => {
+            const prevIndex =
+              currentSlideIndex === 0
+                ? heroSlides.length - 1
+                : currentSlideIndex - 1;
+            setCurrentSlideIndex(prevIndex);
+            setCurrentSlide(heroSlides[prevIndex]);
+          }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-300 opacity-0 hover:opacity-100 group-hover:opacity-100"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <svg
+            className="w-6 h-6 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </motion.button>
+
+        <motion.button
+          onClick={() => {
+            const nextIndex = (currentSlideIndex + 1) % heroSlides.length;
+            setCurrentSlideIndex(nextIndex);
+            setCurrentSlide(heroSlides[nextIndex]);
+          }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-300 opacity-0 hover:opacity-100 group-hover:opacity-100"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <svg
+            className="w-6 h-6 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </motion.button>
+
+        {/* Slide Indicators with Progress */}
+        <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+          {heroSlides.map((_, index) => (
+            <motion.button
+              key={index}
+              onClick={() => {
+                setCurrentSlideIndex(index);
+                setCurrentSlide(heroSlides[index]);
+              }}
+              className="relative group"
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <div
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlideIndex
+                    ? "bg-white/80 w-6"
+                    : "bg-white/40 group-hover:bg-white/60"
+                }`}
+              />
+              {index === currentSlideIndex && !isPaused && (
+                <motion.div
+                  className="absolute inset-0 bg-white/60 rounded-full"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 5, ease: "linear" }}
+                  style={{ transformOrigin: "left" }}
+                />
+              )}
+            </motion.button>
+          ))}
         </div>
       </div>
+
+      {/* Background Gradient - Fixed Position with Animated Colors */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-[-1]">
-        <GradientComponent colors={red} sizeVW={150} />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`gradient-${currentSlide.id}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 1.5,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+          >
+            <GradientComponent colors={currentSlide.gradient} sizeVW={150} />
+          </motion.div>
+        </AnimatePresence>
       </div>
-      <div className="relative w-full h-full">
+
+      {/* Cards Section */}
+      <div className="relative w-full">
         <GlassPaneBG paneWidth={50}>
-          <div className="flex flex-col items-center p-4">
-            <h1 className="text-[45px] text-accent text-center mt-4">
+          <div className="flex flex-col items-center ">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-accent text-center mt-4 sm:mt-6 mb-6 sm:mb-8 max-w-4xl leading-tight">
               Generate anything in any style
-            </h1>
-            <div className="mt-4">
-              <CardScroll cardData={cardData1} />
-            </div>
-            <div className="mt-4">
-              <CardScroll cardData={cardData2} />
+            </h2>
+
+            {/* Card Scrolls */}
+            <div className="w-full">
+              <div className="overflow-hidden">
+                <CardScroll cardData={cardData1} />
+              </div>
+              <div className="overflow-hidden">
+                <CardScroll cardData={cardData2} />
+              </div>
             </div>
           </div>
         </GlassPaneBG>

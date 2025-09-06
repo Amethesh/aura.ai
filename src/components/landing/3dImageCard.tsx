@@ -2,7 +2,7 @@
 
 "use client"; // This component uses hooks, so it must be a client component.
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   motion,
   useMotionValue,
@@ -37,6 +37,36 @@ export const ImageCard3D = ({
   topImageScale = 1.1,
   fontSize = 20,
 }: ImageCard3DProps) => {
+  const [windowWidth, setWindowWidth] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    handleResize(); // Set initial value
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Responsive dimensions based on screen size
+  const isMobile = windowWidth < 768;
+  const isTablet = windowWidth >= 768 && windowWidth < 1024;
+  
+  const responsiveWidth = isMobile 
+    ? Math.min(width * 0.5, 280) 
+    : isTablet 
+    ? Math.min(width * 0.8, 400) 
+    : width;
+    
+  const responsiveHeight = isMobile 
+    ? Math.min(height * 0.5, 380) 
+    : isTablet 
+    ? Math.min(height * 0.8, 560) 
+    : height;
+    
+  const responsiveFontSize = isMobile 
+    ? Math.max(fontSize * 0.9, 12) 
+    : isTablet 
+    ? Math.max(fontSize * 1, 16) 
+    : fontSize;
   const ref = useRef<HTMLDivElement>(null);
 
   // --- MOUSE-BASED Motion Logic (existing) ---
@@ -122,20 +152,20 @@ export const ImageCard3D = ({
         onMouseLeave={handleMouseLeave}
         style={{
           transform: transform,
-          width: `${width}px`,
-          height: `${height}px`,
+          width: `${responsiveWidth}px`,
+          height: `${responsiveHeight}px`,
         }}
         whileHover={{ scale: 1.05, transition: { type: "spring" } }}
-        className="relative rounded-[26px] [transform-style:preserve-3d]"
+        className="relative rounded-[16px] md:rounded-[26px] [transform-style:preserve-3d]"
       >
 
         {/* Layer 1: Bottom Image (Static) */}
         <div
-          className="absolute inset-0 w-full h-full rounded-[26px] bg-cover bg-center"
+          className="absolute inset-0 w-full h-full rounded-[16px] md:rounded-[26px] bg-cover bg-center"
           style={{
             backgroundImage: `url(${bottomImageUrl})`,
             boxShadow:
-              "rgba(0, 0, 0, 0.1) 0px 20px 10px 0px, rgba(0, 0, 0, 0.1) 0px 20px 6px 0px",
+              "rgba(0, 0, 0, 0.1) 0px 10px 5px 0px, rgba(0, 0, 0, 0.1) 0px 10px 3px 0px",
           }}
         />
 
@@ -153,13 +183,13 @@ export const ImageCard3D = ({
 
         {/* Layer 3: Text (Parallax) */}
         <motion.p
-          className="absolute bottom-0 -right-1/2 w-full font-gothic font-bold text-white text-opacity-80"
+          className="absolute bottom-0 -right-1/2 w-full font-gothic font-medium text-white"
           style={{
             translateX: textTranslateX,
             translateY: textTranslateY,
             scale: 1.2,
             z: 60,
-            fontSize: `${fontSize}px`,
+            fontSize: `${responsiveFontSize}px`,
           }}
         >
           {cardText}
@@ -167,7 +197,7 @@ export const ImageCard3D = ({
 
         {/* Layer 4: Glare Effect */}
         <motion.div
-          className="pointer-events-none absolute inset-0 w-full h-full rounded-[26px] mix-blend-soft-light"
+          className="pointer-events-none absolute inset-0 w-full h-full rounded-[16px] md:rounded-[26px] mix-blend-soft-light"
           style={{ background: glareBackground }}
         />
       </motion.div>

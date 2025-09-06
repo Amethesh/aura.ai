@@ -37,7 +37,7 @@ const DynamicParameters = ({
   } else {
     steps = "steps";
   }
-  
+
   const handleParamChange = (key: string, value: any) => {
     onValuesChange({
       ...outputParameters,
@@ -75,21 +75,24 @@ const DynamicParameters = ({
         break;
     }
   };
-
   return (
-    <>
+    <div className="grid grid-cols-2 lg:flex lg: items-center justify-center gap-x-6 gap-y-4">
       {numOfOutputsParam && (
-        <AnimatedCounter
-          label="Batch"
-          initialValue={numOfOutputsParam.default ?? 1}
-          min={numOfOutputsParam.minimum ?? 1}
-          max={numOfOutputsParam.maximum ?? 4}
-          onChange={(value) => handleParamChange("num_of_outputs", value)}
-        />
+        <div className="flex flex-col justify-center items-center gap-2">
+          <p className="text-xs text-gray-300 font-medium tracking-wide">
+            Batch
+          </p>
+          <AnimatedCounter
+            initialValue={numOfOutputsParam.default ?? 1}
+            min={numOfOutputsParam.minimum ?? 1}
+            max={numOfOutputsParam.maximum ?? 4}
+            onChange={(value) => handleParamChange("num_of_outputs", value)}
+          />
+        </div>
       )}
 
       {aspect_ratio && aspect_ratio.enum && (
-        <div className="flex flex-col justify-center items-center ml-2 gap-4">
+        <div className="flex flex-col justify-center items-center gap-2">
           <p className="text-xs text-gray-300 font-medium tracking-wide">
             Aspect Ratio
           </p>
@@ -97,7 +100,7 @@ const DynamicParameters = ({
             onValueChange={(value) => handleParamChange("aspect_ratio", value)}
             defaultValue={aspect_ratio.default || "1:1"}
           >
-            <SelectTrigger className="w-[110px]">
+            <SelectTrigger className="w-full min-w-[110px]">
               <SelectValue placeholder="Select a Ratio" />
             </SelectTrigger>
             <SelectContent>
@@ -116,7 +119,7 @@ const DynamicParameters = ({
         </div>
       )}
 
-      <div className="flex flex-col justify-center items-center ml-2 gap-4">
+      <div className="flex flex-col justify-center items-center gap-2">
         <p className="text-xs text-gray-300 font-medium tracking-wide">
           Quality
         </p>
@@ -124,7 +127,8 @@ const DynamicParameters = ({
           onValueChange={(value) => qualitySettings(value)}
           defaultValue="medium"
         >
-          <SelectTrigger className="w-[80px]">
+          {/* Smaller trigger width on mobile */}
+          <SelectTrigger className="w-full min-w-[90px]">
             <SelectValue placeholder="Medium" />
           </SelectTrigger>
           <SelectContent>
@@ -139,8 +143,8 @@ const DynamicParameters = ({
       </div>
 
       {promptUpsamplingParam && (
-        <div className="flex flex-col justify-evenly items-center ml-2 gap-4">
-          <p className="text-xs text-gray-300 font-medium tracking-wide mb-1">
+        <div className="flex flex-col justify-center items-center gap-2">
+          <p className="text-xs text-gray-300 font-medium tracking-wide">
             Enhance prompt
           </p>
           <Switch
@@ -151,7 +155,7 @@ const DynamicParameters = ({
           />
         </div>
       )}
-    </>
+    </div>
   );
 };
 
