@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { MouseParallaxItem, MouseParallaxProvider } from "./MouseParallax";
 import HorizontalImageScroller from "./HorizontalImageScroller";
+import Link from "next/link";
 
 const sampleImages = [
   {
@@ -91,11 +92,11 @@ const EndSection = () => {
             <span className="z-10">WITH</span>
           </p>
           <p className="absolute bottom-1/2 pb-4 right-36 text-[100px] text-white font-bold">
-            <a
+            <Link
               href="#"
               className="relative mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
             >
-              <img
+              <Image
                 src="/images/newlogo.png"
                 alt="logo"
                 width={90}
@@ -104,7 +105,7 @@ const EndSection = () => {
               <p className="text-[120px] font-bold text-white">
                 Aura<span className="text-accent">.</span>ai
               </p>
-            </a>
+            </Link>
           </p>
         </MouseParallaxItem>
       </MouseParallaxProvider>

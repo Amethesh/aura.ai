@@ -175,6 +175,28 @@
   box-shadow: inset 0px 0px 12px -4px rgba(200, 200, 200, 0.25);
 }
 
+@keyframes fade-and-scale {
+  0%, 100% {
+    opacity: 1;
+    transform: scale3d(0.4, 0.4, 1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale3d(2.2, 2.2, 1);
+  }
+}
+
+@keyframes move-particle {
+  from {
+    /* We will provide these --from values dynamically from React */
+    transform: translate3d(var(--from-x), var(--from-y), 0);
+  }
+  to {
+    /* We will provide these --to values dynamically from React */
+    transform: translate3d(var(--to-x), var(--to-y), 0);
+  }
+}
+
 @keyframes rainbow-flow {
   from {
     background-position: 50% 50%, 50% 50%;

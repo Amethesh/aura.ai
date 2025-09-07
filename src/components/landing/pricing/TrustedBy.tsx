@@ -17,7 +17,7 @@ const TrustedBy = () => {
     <section className="py-20">
       <div className="container mx-auto px-4">
         <h2 className="text-center text-xl font-medium text-white/60 mb-8">
-          Trusted by the world's most innovative teams
+          Trusted by the world s most innovative teams
         </h2>
 
         {/* 
